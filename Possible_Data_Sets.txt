@@ -1,0 +1,7 @@
+This file should be used to orginize possible data sets (by url)
+
+Classify three types of brain tumors (plus a control) from an MRI
+1. https://www.kaggle.com/sartajbhuvaji/brain-tumor-classification-mri
+
+Find the probability that a person has a cardiovascular disease from 11 features
+2. https://www.kaggle.com/bhadaneeraj/cardio-vascular-disease-detection?select=cardio_train.csv
