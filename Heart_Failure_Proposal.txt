@@ -1,0 +1,33 @@
+﻿DSci 445 
+Final Project Proposal
+16 November 2021
+
+
+Proposal:
+Data: Heart Failure Prediction Dataset from Kaggle and UCI Machine Learning Repository
+Cardiovascular diseases (CVDs) are the number 1 cause of death globally, taking an estimated 17.9 million lives each year, which accounts for 31% of all deaths worldwide.  Heart failure is a common event caused by CVDs and this dataset contains 11 variables that can be used to predict  possible heart disease. Machine learning model can be useful in predicting which of these variables contribute to heart failure.
+Potential methods: Classification using
+	Bootstrapping (to simulate larger data sets)
+	Bagging/Boosting
+	SVM
+	validation with confusion matrix and cross validation
+Questions: 1. Can we identify one (or more) symptoms (or symptoms families) that are strong indicators of heart failure?
+	2. Can we identify a method that performs most efficiently
+ 
+
+https://www.kaggle.com/fedesoriano/heart-failure-prediction
+
+Timeline:
+	Part 1: Identifying method parts
+		creating method code
+		cleaning data
+	Complete by: Dec 3
+
+	Part 2: 
+		running data, gathering results
+		analyzing results & writing paper
+		Creating presentation
+	Complete by: Dec 7
+
+Citations:
+fedesoriano. (September 2021). Heart Failure Prediction Dataset. Retrieved 14 Nov, 2021 from https://www.kaggle.com/fedesoriano/heart-failure-prediction.
