@@ -1,0 +1,11 @@
+DSCI 445 Project proposal
+
+
+https://www.kaggle.com/kevinarvai/clinvar-conflicting
+
+
+Genetic variant Classifications dataset.
+
+Question: What method can predict conflicting classification more accurately?
+what variable is the most important for predicting conflicting classification?
+Does dimension reduction help?
