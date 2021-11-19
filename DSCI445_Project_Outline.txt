@@ -1,0 +1,14 @@
+﻿Models: 
+	Everyone: EDA
+	Jorie: LDA, RF, SVM, set up training/test sets (By Nov 22)
+	Henrique: PCA/PCR, Logistic Regression, Boosting
+	Oriana: LASSO, PLS, Bagging
+
+Schedule:
+	Dec 1: Finish EDA & models
+	Dec 2-6: paper & presentations
+
+Rough Outline:
+	EDA & background
+	Methods
+	Findings & Results (test errors, plots, etc)
