@@ -24,6 +24,7 @@ library(tree)
 library(randomForest)
 library(gbm)
 library(caret)
+library(GGally)
 
 ```
 
@@ -32,5 +33,15 @@ library(caret)
 
 ```{r}
 train <- read.csv("train.csv")
+
+head(train)
+
+str(train)
 ```
+
+
+```{r}
+ggpairs(train)
+```
+
 
