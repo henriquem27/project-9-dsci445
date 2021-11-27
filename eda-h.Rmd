@@ -64,6 +64,8 @@ ggarrange(p1,p2,p3,p4)
 ```
 
 
+When looking at age and HeartDisease there seems to be a clear difference between the two means , which can also be seem in the sex category.
+
 
 
 
@@ -85,6 +87,18 @@ ggarrange(p1,p2,p3,p4)
 
 
 ```{r}
+p1 <- ggplot(train,aes(x=Oldpeak,y=HeartDisease))+ geom_boxplot()+coord_flip()
 
+
+p2 <-ggplot(train,aes(x=ExerciseAngina,fill=HeartDisease))+ geom_bar(position = "dodge")
+
+p3 <-ggplot(train,aes(x=ST_Slope,fill=HeartDisease))+ geom_bar(position = "dodge")
+
+
+
+ggarrange(p1,p2,p3)
 ```
+
+
+
 
