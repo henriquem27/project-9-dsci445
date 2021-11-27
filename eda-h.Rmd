@@ -1,0 +1,36 @@
+---
+title: "Exploratory Analysis"
+author: "Henrique Magalhaes Rio"
+output: html_notebook
+---
+
+
+
+```{r}
+
+set.seed(445)
+library(leaps)
+library(ISLR)
+library(tidyverse) 
+library(knitr)
+library(glmnet) # package for lasso and ridge regression
+library(pls)
+library(ISLR)
+library(ggpubr)
+library(MASS)
+library(splines)
+library(gam)
+library(tree)
+library(randomForest)
+library(gbm)
+library(caret)
+
+```
+
+
+
+
+```{r}
+train <- read.csv("train.csv")
+```
+
