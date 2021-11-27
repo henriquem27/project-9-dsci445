@@ -1,7 +1,19 @@
-### Generating trainning and test data sets
+### Generating training and test data sets
 
 
 heart <- read.csv("heart.csv")
+
+
+heart$ChestPainType <- as.factor(heart$ChestPainType)
+heart$Sex <- as.factor(heart$Sex)
+heart$FastingBS <- as.factor(heart$FastingBS)
+heart$RestingECG <- as.factor(heart$RestingECG)
+heart$ExerciseAngina <- as.factor(heart$ExerciseAngina)
+heart$ST_Slope <- as.factor(heart$ST_Slope)
+heart$HeartDisease <- as.factor(heart$HeartDisease)
+
+str(heart)
+
 
 library(tidyverse) 
 
@@ -14,5 +26,7 @@ train <- heart[trn,]
 test <- heart[!trn,]
 
 
-write_csv(train, path = "train.csv")
-write_csv(test, path = "test.csv")
+write_csv(train, file  = "train.csv")
+write_csv(test, file = "test.csv")
+
+
