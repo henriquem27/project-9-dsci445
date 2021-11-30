@@ -1,0 +1,104 @@
+---
+title: "Exploratory Analysis"
+author: "Henrique Magalhaes Rio"
+output: html_notebook
+---
+
+
+
+```{r}
+
+set.seed(445)
+library(leaps)
+library(ISLR)
+library(tidyverse) 
+library(knitr)
+library(glmnet) # package for lasso and ridge regression
+library(pls)
+library(ISLR)
+library(ggpubr)
+library(MASS)
+library(splines)
+library(gam)
+library(tree)
+library(randomForest)
+library(gbm)
+library(caret)
+library(GGally)
+
+```
+
+
+
+
+```{r}
+train <- read.csv("train.csv")
+
+head(train)
+
+
+train$ChestPainType <- as.factor(train$ChestPainType)
+train$Sex <- as.factor(train$Sex)
+train$FastingBS <- as.factor(train$FastingBS)
+train$RestingECG <- as.factor(train$RestingECG)
+train$ExerciseAngina <- as.factor(train$ExerciseAngina)
+train$ST_Slope <- as.factor(train$ST_Slope)
+train$HeartDisease <- as.factor(train$HeartDisease)
+
+str(train)
+```
+
+
+```{r}
+p1 <- ggplot(train,aes(x=Age,y=HeartDisease))+ geom_boxplot()+coord_flip()
+
+
+p2 <-ggplot(train,aes(x=Sex,fill=HeartDisease))+ geom_bar(position = "dodge")
+
+p3 <-ggplot(train,aes(x=ChestPainType,fill=HeartDisease))+ geom_bar(position = "dodge")
+
+p4<- ggplot(train,aes(x=RestingBP,y=HeartDisease))+ geom_boxplot()+coord_flip()
+
+
+ggarrange(p1,p2,p3,p4)
+```
+
+
+When looking at age and HeartDisease there seems to be a clear difference between the two means , which can also be seem in the sex category.
+
+
+
+
+```{r}
+p1 <- ggplot(train,aes(x=Cholesterol,y=HeartDisease))+ geom_boxplot()+coord_flip()
+
+
+p2 <-ggplot(train,aes(x=FastingBS,fill=HeartDisease))+ geom_bar(position = "dodge")
+
+p3 <-ggplot(train,aes(x=RestingECG,fill=HeartDisease))+ geom_bar(position = "dodge")
+
+p4<- ggplot(train,aes(x=MaxHR,y=HeartDisease))+ geom_boxplot()+coord_flip()
+
+
+ggarrange(p1,p2,p3,p4)
+```
+
+
+
+
+```{r}
+p1 <- ggplot(train,aes(x=Oldpeak,y=HeartDisease))+ geom_boxplot()+coord_flip()
+
+
+p2 <-ggplot(train,aes(x=ExerciseAngina,fill=HeartDisease))+ geom_bar(position = "dodge")
+
+p3 <-ggplot(train,aes(x=ST_Slope,fill=HeartDisease))+ geom_bar(position = "dodge")
+
+
+
+ggarrange(p1,p2,p3)
+```
+
+
+
+
