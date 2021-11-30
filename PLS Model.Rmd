@@ -1,0 +1,71 @@
+---
+title: "PLS Model"
+author: "Oriana Meldrum"
+date: "11/30/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+
+#Set up
+#reproducibility
+set.seed(445)
+
+library(ISLR)
+library(leaps)
+library(tidyr)
+library(ggplot2)
+library(glmnet)
+library(caret)
+library(pls) 
+
+
+library(readr)
+heart <- read_csv("heart.csv")
+View(heart)
+
+
+#60/40 split
+heart_df <- sample(x=nrow(heart), size=.40*nrow(heart))
+train <- heart[heart_df,]
+test <-  heart[-heart_df,]
+
+
+
+```
+
+Fitting a PLS model on the training set with $M$ chosen using 10-fold CV (on the training set only)
+
+```{r}
+
+pls_fit <- plsr(HeartDisease ~ ., data = train, scale = TRUE, validation = "CV")
+validationplot(pls_fit, val.type = "MSEP")
+
+pls_prediction <- predict(pls_fit, test, ncomp = 7)
+pls_MSE <- mean((test[, "HeartDisease"] - data.frame(pls_prediction))^2)
+
+m0 <- pcr(HeartDisease~.,data =train, scale = TRUE, validation = "CV")
+mse <- MSEP(m0)
+
+# 2. Create a plot of the CV MSE (note root MSE is reported) vs. $M$.
+mse <- MSEP(m0)
+data.frame(M = mse$comps, mse = t(as.data.frame(mse$val))[, "CV"]) %>%
+  ggplot() +
+  geom_line(aes(M, mse)) +
+  geom_point(aes(M, mse))
+
+
+
+m_pls <- mse$comps[which.min(as.data.frame(mse$val)[1,])]
+
+#values to use:
+mse
+m_pls
+
+```
+
+Test MSE is  0.09841 for PLS at 13 variables

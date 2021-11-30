@@ -1,0 +1,106 @@
+---
+title: "LASSO Model DSCI 445 Project"
+author: "Oriana Meldrum"
+date: "11/26/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Lasso model: from hw 4
+
+```{r}
+#install.packages("glmnet")
+
+#reproducibility
+set.seed(445)
+
+library(ISLR)
+library(leaps)
+library(tidyr)
+library(ggplot2)
+library(glmnet)
+library(caret)
+library(pls) 
+
+
+
+library(readr)
+heart <- read_csv("heart.csv")
+View(heart)
+
+heart_df <- sample(x=nrow(heart), size=.40*nrow(heart))
+train <- heart[heart_df,]
+test <-  heart[-heart_df,]
+
+
+```
+
+```{r}
+#60% training, 40% testing
+
+
+
+train_matrix <- model.matrix(HeartDisease ~ ., data = train)
+test_matrix <- model.matrix(HeartDisease ~ ., data = test)
+grid <- 10^seq(10, -2, length=100)
+
+lasso <- glmnet(train_matrix, train$HeartDisease, alpha = 1, lambda = grid, thresh = 1e-12)
+plot(lasso)
+
+
+#Here it breaks
+#cv_lasso  <- cv.glmnet(train_matrix, train[, "HeartDisease"], alpha=1)
+#plot(cv_ridge)
+#best_lambda_lasso <- cv_lasso$lambda.min
+
+#lasso_prediction <- predict(lasso, newx = test_matrix, s = best_lambda_lasso)
+#lasso_MSE <- mean((lasso_prediction - test[, "HeartDisease"])^2)
+
+#num_zeros <-cv_lasso$nzero[which.min(cv_lasso$cvm)]
+
+
+#values to use:
+#best_lambda_lasso
+#lasso_MSE
+#num_zeros
+
+```
+Test MSE is  00000000000000000 for LASSO
+
+
+```{r}
+#lasso
+
+
+x <- model.matrix(HeartDisease ~ . - 1, data = heart)
+y <- heart$HeartDisease
+lasso_heart <- cv.glmnet(x, y, type.measure = "mse")
+plot(lasso_heart)
+
+coef(lasso_heart)
+
+sqrt(lasso_heart$cvm[lasso_heart$lambda == lasso_heart$lambda.1se])
+
+
+```
+
+
+```{r}
+
+#cv_lasso <- cv.glmnet(heart, heart$HeartDisease, alpha = 1)
+#plot(cv_lasso)
+#plot(lasso_fit)
+
+#opt_lambda <-cv_lasso$lambda.min
+#opt_lambda
+
+#fit.lasso <- glmnet(lasso_fit, Y, alpha = 1)
+#predict(fit.lasso, s = opt_lambda, type = "coefficients")[1:11, ]
+
+
+```
+
+

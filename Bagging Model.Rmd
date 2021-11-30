@@ -1,0 +1,73 @@
+---
+title: "Bagging Model"
+author: "Oriana Meldrum"
+date: "11/30/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Bagging model
+
+```{r}
+#Set up
+#reproducibility
+set.seed(445)
+
+
+library(ISLR)
+library(tidyr)
+library(dplyr)
+library(knitr)
+library(tree)
+library(randomForest) # random forests & bagging
+
+library(readr)
+heart <- read_csv("heart.csv")
+View(heart)
+
+
+#60/40 split
+heart_df <- sample(x=nrow(heart), size=.40*nrow(heart))
+train <- heart[heart_df,]
+test <-  heart[-heart_df,]
+
+
+```
+
+```{r}
+
+bagging <- randomForest(HeartDisease ~ .,data = train, mtry = 19, ntree = 500) 
+predict_bag <- predict(bagging, newdata = test)
+
+
+mean((predict_bag - test$HeartDisease)^2) 
+
+#bagging
+```
+
+Test MSE is  0.1052255 for bagging
+
+
+Now trying to visulize the bagging
+
+```{r}
+
+VI <- data.frame(var=names(heart[,-1]), imp=varImp(bagging))
+
+#sort variable importance descending
+VI_plot <- VI[order(VI$Overall, decreasing=TRUE),]
+
+#visualize variable importance with horizontal bar plot
+barplot(VI_plot$Overall,
+        names.arg=rownames(VI_plot),
+        horiz=TRUE,
+        col='steelblue',
+        xlab='Variable Importance')
+
+```
+
+
+
