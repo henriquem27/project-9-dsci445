@@ -1,0 +1,216 @@
+---
+title: "Group 9 Presentation"
+author: "Henrique, Oriana, Jorie"
+date: "12/4/2021"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r, include=FALSE}
+
+
+#reproducibility
+set.seed(445)
+
+library(ISLR)
+library(leaps)
+library(tidyr)
+library(ggplot2)
+library(glmnet)
+library(caret)
+library(pls) 
+library(tree)
+library(randomForest)
+library(knitr)
+
+train <- read.csv("train.csv")
+test <- read.csv("test.csv")
+
+
+```
+
+## Group 9
+
+Heart Disease
+Oriana Meldrum, Henrique Rio, Jorie Alvis
+
+## LDA
+
+Jorie's LDA
+
+## RF
+
+Jorie's RF
+
+## SVM
+
+Jorie's SVM
+
+## (the new thing)
+
+Henrique's new thing insted of PCA
+
+## Logistic Regression
+
+Henrique's Logisic Regression
+
+
+
+```{r}
+model_glm = glm(HeartDisease ~ ., data = train, family = "binomial")
+#summary(model_glm)
+
+
+predicted2 <- predict(model_glm, newdata = test, "response")
+predicted2 <- ifelse(predicted2>0.5,1,0)
+confm2<-table(predicted=predicted2,True=test$HeartDisease)
+kable(confm2)
+
+paste("the overall fraction of correct predictions in the test dataset is :",(confm2[1,1]+confm2[2,2])/sum(confm2))
+overall_log_reg <- (confm2[1,1]+confm2[2,2])/sum(confm2)
+overall_log_reg
+
+
+log_reg_mse <- mean((predicted2 - test$HeartDisease)^2) #MSE
+
+```
+
+## Boosting
+
+Henrique's Boosting
+
+## LASSO
+
+Oriana's Lasso
+
+```{r}
+
+train_matrix <- model.matrix(HeartDisease ~ ., data = train)
+test_matrix <- model.matrix(HeartDisease ~ ., data = test)
+grid <- 10^seq(10, -2, length=100)
+
+lasso <- glmnet(train_matrix, train$HeartDisease, alpha = 1, lambda = grid, thresh = 1e-12, family = "binomial")
+#plot(lasso)
+
+
+
+cv_lasso  <- cv.glmnet(train_matrix, train[, "HeartDisease"], alpha=1)
+#plot(cv_lasso)
+best_lambda_lasso <- cv_lasso$lambda.min
+
+lasso_prediction <- predict(lasso, newx = test_matrix, s = best_lambda_lasso)
+lasso_MSE <- mean((lasso_prediction - test[, "HeartDisease"])^2)
+
+num_zeros <-cv_lasso$nzero[which.min(cv_lasso$cvm)]
+
+
+# MSE values to use:
+best_lambda_lasso
+lasso_MSE
+num_zeros
+
+
+
+#Confusion Matrix
+#predicted_lasso <- predict(lasso, newdata = test, "response")
+#predicted_lasso <- ifelse(predicted_lasso>0.5,1,0)
+#confm_lasso<-table(predicted=predicted_lasso,True=test$HeartDisease)
+#confm_lasso
+
+
+#Over all correct:
+#overall_lasso <- (confm_lasso[1,1]+confm_lasso[2,2])/sum(confm_lasso)
+
+#kable(confm_lasso) #confusion matrix
+#overall_lasso #over all correct
+```
+
+## PLS
+
+```{r}
+
+pls_fit <- plsr(HeartDisease ~ ., data = train, type= "class", scale = TRUE, validation = "CV")
+#validationplot(pls_fit, val.type = "MSEP")
+
+
+pls_prediction <- predict(pls_fit, test,  ncomp = 7)
+pls_MSE <- mean((test[, "HeartDisease"] - data.frame(pls_prediction))^2)
+
+
+#Confusion Matrix prep
+predicted_pls <- predict(pls_fit, newdata = test)
+predicted_pls <- ifelse(predicted_pls>0.5,1,0)
+#confm_pls<-table(predicted=predicted_pls,True=test$HeartDisease)
+
+#Over all correct:
+
+#overall_pls <- (confm_pls[1,1]+confm_pls[2,2])/sum(confm_pls)
+
+
+
+m0 <- pcr(HeartDisease~.,data =train, scale = TRUE, validation = "CV")
+mse <- MSEP(m0)
+
+m_pls <- mse$comps[which.min(as.data.frame(mse$val)[1,])]
+
+#values to use:
+#mse
+#m_pls
+
+#kable(confm_pls) #confusion matrix
+#overall_pls #over all correct
+
+```
+
+
+## Bagging
+```{r}
+
+bagging <- randomForest(HeartDisease ~ .,data = train, mtry = 19, ntree = 500, type = "class", 
+                        importance = TRUE,
+                        proximity = TRUE) 
+predict_bag <- predict(bagging, newdata = test)
+
+
+#MSE
+bagging_mse <- mean((predict_bag - test$HeartDisease)^2) 
+
+#Confusion Matrix
+predicted_bag <- predict(bagging, newdata = test)
+predicted_bag <- ifelse(predicted_bag>0.5,1,0)
+confm_bag<-table(predicted=predicted_bag,True=test$HeartDisease)
+confm_bag
+
+
+#Over all correct:
+overall_bag <- (confm_bag[1,1]+confm_bag[2,2])/sum(confm_bag)
+
+kable(confm_bag) #confusion matrix
+overall_bag #over all correct
+
+```
+
+
+## Comparision of all method's MSE
+
+Chart with all MSE
+
+```{r}
+library(knitr)
+df1 = data.frame(Method = c('LDA', 'RF', 'SVM', 'new THING', 'Logistic Regression', 'Boosting', 'LASSO', 'PLS', 'Bagging'),  MSE = c(0,0,0,0,0.1498638,0,0,0.1054 ,0.1165492))
+
+kable(df1)
+
+```
+
+## Conclusion
+
+the METHOD worked best, with an MSE of SOMETHING
+
+```{r pressure}
+plot(pressure)
+```
+
