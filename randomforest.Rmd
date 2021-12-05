@@ -11,8 +11,24 @@ library(randomForest)
 train<-read.csv("train.csv")
 test<-read.csv("test.csv")
 
+options(repos='http://cran.rstudio.org')
+have.packages <- installed.packages()
+cran.packages <- c('devtools','plotrix','randomForest','tree')
+to.install <- setdiff(cran.packages, have.packages[,1])
+if(length(to.install)>0) install.packages(to.install)
+
+library(devtools)
+if(!('reprtree' %in% installed.packages())){
+  install_github('araastat/reprtree')
+}
+for(p in c(cran.packages, 'reprtree')) eval(substitute(library(pkg), list(pkg=p)))
+
 ```
 
+
+```{r}
+library(reprtree)
+```
 
 
 ```{r}
@@ -38,3 +54,19 @@ print(rf_fit)
 plot(rf_fit)
 ```
 
+
+
+
+```{r}
+reprtree:::plot.getTree(rf_fit)
+```
+
+
+https://stats.stackexchange.com/questions/41443/how-to-actually-plot-a-sample-tree-from-randomforestgettree
+
+
+
+Identifying representative trees from ensembles
+Banerjee, Mousumi ; Ding, Ying ; Noone, Anne-Michelle
+Chichester, UK: John Wiley & Sons, Ltd
+Statistics in medicine, 2012-07-10, Vol.31 (15), p.1601-1616
