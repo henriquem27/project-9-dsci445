@@ -1,0 +1,29 @@
+---
+title: "RandomForest"
+author: "Henrique Rio"
+date: "12/5/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(randomForest)
+train<-read.csv("train.csv")
+test<-read.csv("test.csv")
+
+```
+
+
+
+```{r}
+rf_fit <- randomForest(HeartDisease ~ ., data = train, mtry = sqrt(ncol(train) - 1), importance = TRUE, type= "classification")
+
+true <- test$HeartDisease
+rf <- predict(rf_fit,test,type="class")
+
+testnmse <- mean((rf-true)^2)
+
+
+paste("Random forest tree test error",testnmse)
+```
+
