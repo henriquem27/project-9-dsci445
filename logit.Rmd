@@ -19,6 +19,24 @@ train <- read.csv("train.csv")
 test <- read.csv("test.csv")
 
 
+
+train$ChestPainType <- as.factor(train$ChestPainType)
+train$Sex <- as.factor(train$Sex)
+train$FastingBS <- as.factor(train$FastingBS)
+train$RestingECG <- as.factor(train$RestingECG)
+train$ExerciseAngina <- as.factor(train$ExerciseAngina)
+train$ST_Slope <- as.factor(train$ST_Slope)
+train$HeartDisease <- as.factor(train$HeartDisease)
+
+
+test$ChestPainType <- as.factor(test$ChestPainType)
+test$Sex <- as.factor(test$Sex)
+test$FastingBS <- as.factor(test$FastingBS)
+test$RestingECG <- as.factor(test$RestingECG)
+test$ExerciseAngina <- as.factor(test$ExerciseAngina)
+test$ST_Slope <- as.factor(test$ST_Slope)
+test$HeartDisease <- as.factor(test$HeartDisease)
+
 model_glm = glm(HeartDisease ~ ., data = train, family = "binomial")
 
 summary(model_glm)
