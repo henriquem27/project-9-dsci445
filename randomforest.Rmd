@@ -16,14 +16,25 @@ test<-read.csv("test.csv")
 
 
 ```{r}
-rf_fit <- randomForest(HeartDisease ~ ., data = train, mtry = sqrt(ncol(train) - 1), importance = TRUE, type= "classification")
+rf_fit <- randomForest(as.factor(HeartDisease) ~ ., data = train, mtry = sqrt(ncol(train) - 1), importance = TRUE, type= "classification")
 
 true <- test$HeartDisease
 rf <- predict(rf_fit,test,type="class")
 
-testnmse <- mean((rf-true)^2)
+predicted2 <- ifelse(rf>0.5,1,0)
+
+confm2<-table(predicted=rf,True=true)
+confm2
 
 
-paste("Random forest tree test error",testnmse)
+paste("the overall fraction of correct predictions in the test dataset is :",(confm2[1,1]+confm2[2,2])/sum(confm2))
+```
+
+```{r}
+print(rf_fit)
+```
+
+```{r}
+plot(rf_fit)
 ```
 
