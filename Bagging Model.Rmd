@@ -25,38 +25,42 @@ library(tree)
 library(randomForest) # random forests & bagging
 
 library(readr)
-heart <- read_csv("heart.csv")
-View(heart)
 
 
 #60/40 split
-heart_df <- sample(x=nrow(heart), size=.40*nrow(heart))
-train <- heart[heart_df,]
-test <-  heart[-heart_df,]
+train <-train
+test <- test
 
 
 ```
 
 ```{r}
+bagging <- randomForest(HeartDisease ~ .,data = train, mtry = 19, ntree = 500, type = "class", 
+                        importance = TRUE,
+                        proximity = TRUE) 
 
-bagging <- randomForest(HeartDisease ~ .,data = train, mtry = 19, ntree = 500) 
+
+
+
+#Confusion Matrix
 predict_bag <- predict(bagging, newdata = test)
+predicted_bag <- ifelse(predict_bag>0.5,1,0)
+confm_bag<-table(predict_bag,test$HeartDisease)
+confm_bag
+
+#MSE
+bagging_mse <- mean((predict_bag - test$HeartDisease)^2) 
+
+#Over all correct:
+overall_bag <- (confm_bag[1,1]+confm_bag[2,2])/sum(confm_bag)
+
+kable(confm_bag) #confusion matrix
+overall_bag #over all correct
 
 
-mean((predict_bag - test$HeartDisease)^2) 
-
-#bagging
-```
-
-Test MSE is  0.1052255 for bagging
-
-
-Now trying to visulize the bagging
-
-```{r}
-
-VI <- data.frame(var=names(heart[,-1]), imp=varImp(bagging))
-
+#Visulizaton of bagging
+VI <- data.frame(var=names(test[,-1]), imp=varImp(bagging))
+VI
 #sort variable importance descending
 VI_plot <- VI[order(VI$Overall, decreasing=TRUE),]
 
@@ -67,7 +71,13 @@ barplot(VI_plot$Overall,
         col='steelblue',
         xlab='Variable Importance')
 
+#bagging
 ```
+
+Test MSE is  0.1052255 for bagging
+
+
+
 
 
 

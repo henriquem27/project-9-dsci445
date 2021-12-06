@@ -2,7 +2,9 @@
 title: "Group 9 Presentation"
 author: "Henrique, Oriana, Jorie"
 date: "12/4/2021"
-output: ioslides_presentation
+output:
+  beamer_presentation: default
+  ioslides_presentation: default
 ---
 
 ```{r setup, include=FALSE}
@@ -29,6 +31,7 @@ set.seed(445)
 library(ISLR)
 library(leaps)
 library(tidyr)
+library(dplyr)
 library(ggplot2)
 library(glmnet)
 library(caret)
@@ -39,6 +42,7 @@ library(knitr)
 library(class)
 library(fastDummies)
 library(reprtree)
+
 
 
 
@@ -73,6 +77,14 @@ test$HeartDisease <- as.factor(test$HeartDisease)
 
 Heart Disease
 Oriana Meldrum, Henrique Rio, Jorie Alvis
+
+## Introduction
+
+In 2019 659,041 Americans died of heart disease. Four out of five heart disease deaths are due to heart attacks and strokes, and one-third of these deaths occur prematurely in people under 70 years of age. Heart failure is a common event caused by heart disease and this dataset we used contains 11 variables that can be used to predict a possible heart disease.
+
+People with cardiovascular disease or who are at high cardiovascular risk (due to the presence of one or more risk factors) need early detection and management so machine learning techniques are of great clinical intrest for early detection. 
+
+(https://www.cdc.gov/nchs/fastats/leading-causes-of-death.htm, https://www.kaggle.com/fedesoriano/heart-failure-prediction)
 
 ## LDA
 
@@ -163,7 +175,7 @@ lasso <- glmnet(train_matrix, train$HeartDisease, alpha = 1, lambda = grid, thre
 
 
 
-cv_lasso  <- cv.glmnet(train_matrix, train[, "HeartDisease"], alpha=1)
+cv_lasso  <- cv.glmnet(train_matrix, train[, "HeartDisease"], alpha=1,family = "binomial")
 #plot(cv_lasso)
 best_lambda_lasso <- cv_lasso$lambda.min
 
@@ -181,17 +193,17 @@ num_zeros
 
 
 #Confusion Matrix
-#predicted_lasso <- predict(lasso, newdata = test, "response")
-#predicted_lasso <- ifelse(predicted_lasso>0.5,1,0)
-#confm_lasso<-table(predicted=predicted_lasso,True=test$HeartDisease)
-#confm_lasso
+predicted_lasso <- predict(lasso, newx= test_matrix, s=best_lambda_lasso)
+predicted_lasso <- ifelse(predicted_lasso>0.5,1,0)
+confm_lasso<-table(predicted=predicted_lasso,True=test$HeartDisease)
+confm_lasso
 
 
 #Over all correct:
-#overall_lasso <- (confm_lasso[1,1]+confm_lasso[2,2])/sum(confm_lasso)
+overall_lasso <- (confm_lasso[1,1]+confm_lasso[2,2])/sum(confm_lasso)
 
-#kable(confm_lasso) #confusion matrix
-#overall_lasso #over all correct
+kable(confm_lasso) #confusion matrix
+overall_lasso #over all correct
 ```
 
 ## KNN
@@ -236,24 +248,38 @@ mean(knn_pred_1 !=test$HeartDisease)
 bagging <- randomForest(HeartDisease ~ .,data = train, mtry = 19, ntree = 500, type = "class", 
                         importance = TRUE,
                         proximity = TRUE) 
-predict_bag <- predict(bagging, newdata = test)
 
+
+
+
+#Confusion Matrix
+predict_bag <- predict(bagging, newdata = test)
+predicted_bag <- ifelse(predict_bag>0.5,1,0)
+confm_bag<-table(predict_bag,test$HeartDisease)
+confm_bag
 
 #MSE
 bagging_mse <- mean((predict_bag - test$HeartDisease)^2) 
-
-#Confusion Matrix
-predicted_bag <- predict(bagging, newdata = test)
-predicted_bag <- ifelse(predicted_bag>0.5,1,0)
-confm_bag<-table(predicted=predicted_bag,True=test$HeartDisease)
-confm_bag
-
 
 #Over all correct:
 overall_bag <- (confm_bag[1,1]+confm_bag[2,2])/sum(confm_bag)
 
 kable(confm_bag) #confusion matrix
 overall_bag #over all correct
+
+
+#Visulizaton of bagging
+VI <- data.frame(var=names(test[,-1]), imp=varImp(bagging))
+
+#sort variable importance descending
+VI_plot <- VI[order(VI$imp.0, decreasing=TRUE),]
+
+#visualize variable importance with horizontal bar plot
+barplot(VI_plot$imp.0,
+        names.arg=rownames(VI_plot),
+        horiz=TRUE,
+        col='steelblue',
+        xlab='Variable Importance')
 
 ```
 
@@ -274,7 +300,4 @@ kable(df1)
 
 the METHOD worked best, with an MSE of SOMETHING
 
-```{r pressure}
-plot(pressure)
-```
 

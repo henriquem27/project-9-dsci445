@@ -69,3 +69,45 @@ m_pls
 ```
 
 Test MSE is  0.09841 for PLS at 13 variables
+
+
+## PLS
+
+```{r}
+
+pls_fit <- plsr(HeartDisease ~ ., data = train, type= "class", scale = TRUE, validation = "CV")
+#validationplot(pls_fit, val.type = "MSEP")
+
+
+pls_prediction <- predict(pls_fit, test,  ncomp = 7)
+#pls_MSE <- mean((test[, "HeartDisease"] - data.frame(pls_prediction))^2)
+
+
+#Confusion Matrix prep
+predicted_pls <- predict(pls_fit, newdata = test)
+predicted_pls <- ifelse(predicted_pls>0.5,1,0)
+#confm_pls<-table(predicted=predicted_pls,True=test$HeartDisease)
+
+#Over all correct:
+
+#overall_pls <- (confm_pls[1,1]+confm_pls[2,2])/sum(confm_pls)
+
+
+
+m0 <- pcr(HeartDisease~.,data =train, scale = TRUE, validation = "CV")
+mse <- MSEP(m0)
+
+m_pls <- mse$comps[which.min(as.data.frame(mse$val)[1,])]
+
+#values to use:
+#mse
+#m_pls
+
+#kable(confm_pls) #confusion matrix
+#overall_pls #over all correct
+
+```
+
+
+
+
