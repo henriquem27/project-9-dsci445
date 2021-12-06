@@ -7,6 +7,17 @@ output: ioslides_presentation
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
+options(repos='http://cran.rstudio.org')
+have.packages <- installed.packages()
+cran.packages <- c('devtools','plotrix','randomForest','tree')
+to.install <- setdiff(cran.packages, have.packages[,1])
+if(length(to.install)>0) install.packages(to.install)
+
+library(devtools)
+if(!('reprtree' %in% installed.packages())){
+  install_github('araastat/reprtree')
+}
+for(p in c(cran.packages, 'reprtree')) eval(substitute(library(pkg), list(pkg=p)))
 ```
 
 ```{r, include=FALSE}
@@ -27,6 +38,13 @@ library(randomForest)
 library(knitr)
 library(class)
 library(fastDummies)
+library(reprtree)
+
+
+
+
+
+
 
 train <- read.csv("train.csv")
 test <- read.csv("test.csv")
@@ -63,6 +81,31 @@ Jorie's LDA
 ## RF
 
 Henrique's RF
+
+
+```{r}
+rf_fit <- randomForest(as.factor(HeartDisease) ~ ., data = train, mtry = sqrt(ncol(train) - 1), importance = TRUE, type= "classification")
+
+true <- test$HeartDisease
+rf <- predict(rf_fit,test,type="class")
+
+predicted2 <- ifelse(rf>0.5,1,0)
+
+confm2<-table(predicted=rf,True=true)
+kable(confm2)
+
+
+paste("the overall fraction of correct predictions in the test dataset is :",(confm2[1,1]+confm2[2,2])/sum(confm2))
+
+rf_fit
+```
+
+
+## Representative Tree Paper
+
+```{r}
+reprtree:::plot.getTree(rf_fit)
+```
 
 ## SVM
 
