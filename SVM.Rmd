@@ -1,0 +1,90 @@
+---
+title: "SVM_model"
+author: "Jorie Alvis"
+date: "December 1, 2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+
+library(e1071) # svm library
+
+set.seed(445)
+```
+
+```{r Data, include=FALSE}
+heart_train = read.csv("train.csv")
+
+heart_train$Sex = factor(heart_train$Sex)
+heart_train$ChestPainType = factor(heart_train$ChestPainType)
+heart_train$FastingBS = factor(heart_train$FastingBS)
+heart_train$RestingECG = factor(heart_train$RestingECG)
+heart_train$ExerciseAngina = factor(heart_train$ExerciseAngina)
+heart_train$ST_Slope = factor(heart_train$ST_Slope)
+heart_train$HeartDisease = factor(heart_train$HeartDisease)
+```
+
+```{r SVM_Linear}
+# Train a Linear SVM and find the best cost value
+# We set scale=TRUE becuase the continuous varibles seem to be normally distrabuted (from EDA)
+svm_linear_cv = tune(svm, HeartDisease~., scale=TRUE, kernel="linear", data=heart_train,
+                      ranges = list(cost = seq(0.1, 5, by = 0.1)))
+svm_linear = svm_linear_cv$best.model
+
+preds = predict(svm_linear, heart_train, type="class")
+
+table(heart_train$HeartDisease, preds)
+```
+
+```{r SVM_Polynomial}
+# Train a Polynomial SVM
+# Find the best cost and degree parameter
+svm_poly_cv = tune(svm, HeartDisease~., scale=TRUE, kernel="polynomial", data=heart_train,
+                      ranges = list(cost = seq(0.1, 5, by = 0.1),
+                                    degree = c(2,3,4, 5)))
+svm_poly = svm_poly_cv$best.model
+
+preds = predict(svm_poly, heart_train, type="class")
+
+table(heart_train$HeartDisease, preds)
+```
+
+```{r SVM_Radial}
+# Train a Radial SVM
+# Find the best cost and gamma parameter
+svm_radial_cv = tune(svm, HeartDisease~., scale=TRUE, kernel="radial", data=heart_train,
+                      ranges = list(cost = seq(0.2, 5, by = 0.2),
+                                    gamma = seq(0.25, 3, by = 0.25)))
+svm_radial = svm_radial_cv$best.model
+
+preds = predict(svm_radial, heart_train, type="class")
+
+table(heart_train$HeartDisease, preds)
+```
+
+```{r Testing}
+heart_test = read.csv("test.csv")
+
+preds_liner = predict(svm_linear, heart_test, type="class")
+acc_liner = sum(ifelse(preds_liner == heart_test$HeartDisease, 1, 0))/nrow(heart_test)
+
+preds_poly = predict(svm_poly, heart_test, type="class")
+acc_poly = sum(ifelse(preds_poly == heart_test$HeartDisease, 1, 0))/nrow(heart_test)
+
+preds_radial = predict(svm_radial, heart_test, type="class")
+acc_radial = sum(ifelse(preds_radial == heart_test$HeartDisease, 1, 0))/nrow(heart_test) #87.2%
+
+c("Linear Svm" = acc_liner, "Polynomial Svm" = acc_poly, "Radial SVM" = acc_radial)
+```
+
+The SVM kernal with the highest auccuracy was the radial kernal with a `r round(acc_radial, 3)*100`% accuracy. The Radial SVM had a cost parameter of `r svm_radial$cost` and gamma parameter of `r svm_radial$gamma`.
+
+```{r Best_SVM}
+table(heart_test$HeartDisease, preds_radial)
+radial_mse = sum((heart_test$HeartDisease-as.integer(preds_radial))^2)/nrow(heart_test) #1.253
+```
+
+We can see from the confusion matrix of our Radial SVM that there is little bias in the miss-classifications while the MSE is `r round(radial_mse, 4)`.
