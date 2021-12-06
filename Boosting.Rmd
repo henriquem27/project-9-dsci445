@@ -1,0 +1,61 @@
+---
+title: "Boosting"
+author: "Jorie Alvis"
+date: "December 5, 2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+
+library(gbm) # boosting package
+
+set.seed(445)
+```
+
+```{r Data, include=FALSE}
+heart_train = read.csv("train.csv")
+
+heart_train$Sex = factor(heart_train$Sex)
+heart_train$ChestPainType = factor(heart_train$ChestPainType)
+heart_train$FastingBS = factor(heart_train$FastingBS)
+heart_train$RestingECG = factor(heart_train$RestingECG)
+heart_train$ExerciseAngina = factor(heart_train$ExerciseAngina)
+heart_train$ST_Slope = factor(heart_train$ST_Slope)
+#heart_train$HeartDisease = factor(heart_train$HeartDisease)
+heart_train$HeartDisease = as.integer(heart_train$HeartDisease)
+
+heart_test = read.csv("test.csv")
+
+heart_test$Sex = factor(heart_test$Sex)
+heart_test$ChestPainType = factor(heart_test$ChestPainType)
+heart_test$FastingBS = factor(heart_test$FastingBS)
+heart_test$RestingECG = factor(heart_test$RestingECG)
+heart_test$ExerciseAngina = factor(heart_test$ExerciseAngina)
+heart_test$ST_Slope = factor(heart_test$ST_Slope)
+#heart_test$HeartDisease = factor(heart_test$HeartDisease)
+heart_test$HeartDisease = as.integer(heart_test$HeartDisease)
+```
+
+```{r Boosting}
+# The response needs to be an integer not a factor
+boosted_model = gbm(HeartDisease~., data=heart_train, n.trees=10000, interaction.depth=3,
+                    shrinkage=0.01, distribution="bernoulli", cv.folds=10)
+gbm.perf(boosted_model, plot.it = TRUE, method="cv")
+```
+
+```{r Testing}
+t=gbm(HeartDisease~., data=heart_train, n.trees=1000, interaction.depth=3,
+                    shrinkage=0.075, distribution="bernoulli")
+
+preds = predict(t, heart_test, type="response")
+preds2 = ifelse(preds<0.5, 0, 1)
+
+acc = sum(as.integer(preds2==heart_test$HeartDisease))/nrow(heart_test)
+
+table(preds2, "True"=heart_test$HeartDisease)
+acc
+summary(t)
+```
