@@ -5,6 +5,7 @@ date: "12/5/2021"
 output: html_document
 ---
 
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(randomForest)
@@ -23,6 +24,8 @@ if(!('reprtree' %in% installed.packages())){
 }
 for(p in c(cran.packages, 'reprtree')) eval(substitute(library(pkg), list(pkg=p)))
 
+
+set.seed(445)
 ```
 
 
@@ -68,15 +71,27 @@ print(rf_fit)
 ```
 
 ```{r}
-plot(rf_fit)
+reprtree:::plot.getTree(rf_fit)
 ```
 
 
 
 
 ```{r}
-reprtree:::plot.getTree(rf_fit)
+
+reptree <- ReprTree(rf_fit, train, metric='d2')
+
 ```
+```{r}
+
+reptree$trees
+plot(reptree, index=1)
+
+```
+
+
+
+
 
 
 https://stats.stackexchange.com/questions/41443/how-to-actually-plot-a-sample-tree-from-randomforestgettree

@@ -84,7 +84,7 @@ Henrique's RF
 
 
 ```{r}
-rf_fit <- randomForest(as.factor(HeartDisease) ~ ., data = train, mtry = sqrt(ncol(train) - 1), importance = TRUE, type= "classification")
+rf_fit <- randomForest(as.factor(HeartDisease) ~ ., data = train, mtry = sqrt(ncol(train)-1), importance = TRUE, type= "classification")
 
 true <- test$HeartDisease
 rf <- predict(rf_fit,test,type="class")
