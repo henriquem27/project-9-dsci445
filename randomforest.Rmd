@@ -12,6 +12,9 @@ library(randomForest)
 train<-read.csv("train.csv")
 test<-read.csv("test.csv")
 
+
+
+
 options(repos='http://cran.rstudio.org')
 have.packages <- installed.packages()
 cran.packages <- c('devtools','plotrix','randomForest','tree')
@@ -86,9 +89,7 @@ paste("the overall fraction of correct predictions in the test dataset is :",(co
 print(rf_fit)
 ```
 
-```{r}
-reprtree:::plot.getTree(rf_fit)
-```
+
 
 
 
@@ -103,14 +104,6 @@ reptree <- ReprTree(rf_fit, train, metric='d2')
 reptree$trees
 plot(reptree, index=1)
 
-
-
-
-```
-```{r}
-treet1 = predict(reptree, test, type = "class")
-
-table(predicted = treet1, actual = test$HeartDisease)
 ```
 
 

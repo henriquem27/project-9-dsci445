@@ -136,10 +136,10 @@ predicted2 <- ifelse(predicted2>0.5,1,0)
 confm2<-table(predicted=predicted2,True=test$HeartDisease)
 kable(confm2)
 
-paste("the overall fraction of correct predictions in the test dataset is :",(confm2[1,1]+confm2[2,2])/sum(confm2))
+paste("The overall fraction of correct predictions in the test dataset is :",(confm2[1,1]+confm2[2,2])/sum(confm2))
 
 
-
+ 
  #MSE
 
 ```
@@ -227,7 +227,6 @@ overall_knn_1
  #confusion matrix
 kable(confm_knn_1)
 mean(knn_pred_1 !=test$HeartDisease)
-
 ```
 
 
