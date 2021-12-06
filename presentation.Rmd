@@ -102,6 +102,9 @@ rf_fit
 
 
 ## Representative Tree
+-Following the paper by  Banerjee, et al.(2011) and the package reprtree we can get a representative tree from the random forest.
+-This tree is calculated using a measure of similarity in which 2 trees are similar if they have the same prediction for all observations.
+-Using this idea on the random forest we get the following tree:
 
 ```{r}
 reptree <- ReprTree(rf_fit, train, metric='d2')
@@ -134,11 +137,10 @@ confm2<-table(predicted=predicted2,True=test$HeartDisease)
 kable(confm2)
 
 paste("the overall fraction of correct predictions in the test dataset is :",(confm2[1,1]+confm2[2,2])/sum(confm2))
-overall_log_reg <- (confm2[1,1]+confm2[2,2])/sum(confm2)
-overall_log_reg
 
 
-log_reg_mse <- mean((predicted2 - test$HeartDisease)^2) #MSE
+
+ #MSE
 
 ```
 
