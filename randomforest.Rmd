@@ -26,6 +26,22 @@ for(p in c(cran.packages, 'reprtree')) eval(substitute(library(pkg), list(pkg=p)
 
 
 set.seed(445)
+
+library(leaps)
+library(ISLR)
+library(tidyverse) 
+library(knitr)
+library(glmnet) # package for lasso and ridge regression
+library(pls)
+library(ISLR)
+library(ggpubr)
+library(MASS)
+library(splines)
+library(gam)
+library(tree)
+library(randomForest)
+library(gbm)
+library(caret)
 ```
 
 
@@ -87,12 +103,43 @@ reptree <- ReprTree(rf_fit, train, metric='d2')
 reptree$trees
 plot(reptree, index=1)
 
+
+
+
+```
+```{r}
+treet1 = predict(reptree, test, type = "class")
+
+table(predicted = treet1, actual = test$HeartDisease)
 ```
 
 
 
+```{r}
 
 
+
+
+tree1 <- tree(HeartDisease~.,data= train)
+
+
+plot(tree1)
+text(tree1)
+
+tree
+
+```
+
+```{r}
+set.seed(445)
+
+treet = predict(tree1, test, type = "class")
+
+table(predicted = treet, actual = test$HeartDisease)
+
+```
+
+Overall test error rate (%83)
 
 https://stats.stackexchange.com/questions/41443/how-to-actually-plot-a-sample-tree-from-randomforestgettree
 

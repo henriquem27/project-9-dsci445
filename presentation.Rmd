@@ -101,10 +101,12 @@ rf_fit
 ```
 
 
-## Representative Tree Paper
+## Representative Tree
 
 ```{r}
-reprtree:::plot.getTree(rf_fit)
+reptree <- ReprTree(rf_fit, train, metric='d2')
+plot(reptree, index=1)
+
 ```
 
 ## SVM
