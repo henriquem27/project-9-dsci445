@@ -1,0 +1,61 @@
+---
+title: "LDA_model"
+author: "Jorie Alvis"
+date: "December 1, 2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+
+library(MASS) # for lda
+
+set.seed(445)
+```
+
+```{r Data, include=FALSE}
+heart_train = read.csv("train.csv")
+
+heart_train$Sex = factor(heart_train$Sex)
+heart_train$ChestPainType = factor(heart_train$ChestPainType)
+heart_train$FastingBS = factor(heart_train$FastingBS)
+heart_train$RestingECG = factor(heart_train$RestingECG)
+heart_train$ExerciseAngina = factor(heart_train$ExerciseAngina)
+heart_train$ST_Slope = factor(heart_train$ST_Slope)
+heart_train$HeartDisease = factor(heart_train$HeartDisease)
+
+heart_test = read.csv("test.csv")
+
+heart_test$Sex = factor(heart_test$Sex)
+heart_test$ChestPainType = factor(heart_test$ChestPainType)
+heart_test$FastingBS = factor(heart_test$FastingBS)
+heart_test$RestingECG = factor(heart_test$RestingECG)
+heart_test$ExerciseAngina = factor(heart_test$ExerciseAngina)
+heart_test$ST_Slope = factor(heart_test$ST_Slope)
+heart_test$HeartDisease = factor(heart_test$HeartDisease)
+```
+
+```{r LDA}
+LDA_model = lda(HeartDisease~., data=heart_train)
+
+preds = predict(LDA_model, heart_train)
+acc = sum(ifelse(preds$class == heart_train$HeartDisease, 1, 0))/nrow(heart_train) # 88.2%
+
+table(preds$class, heart_train$HeartDisease)
+acc
+```
+
+```{r Testing}
+preds = predict(LDA_model, heart_test)
+acc = sum(ifelse(preds$class == heart_test$HeartDisease, 1, 0))/nrow(heart_test) # 85.5%
+
+MSE = sum((as.integer(heart_test$HeartDisease)-as.integer(preds$class))^2)/nrow(heart_test) # 0.1444
+
+table(preds$class, heart_test$HeartDisease)
+acc
+MSE
+```
+
+The MSE seems to be way to low for our accuracy. (look at SVM accuracy and MSE)
