@@ -1,0 +1,70 @@
+---
+title: "Boosting"
+author: "Henrique"
+output: html_notebook
+---
+
+```{r}
+
+train <- read.csv("train.csv")
+test <- read.csv("test.csv")
+library(gbm)
+library(caret)
+
+
+
+
+
+
+
+
+```
+
+
+
+```{r}
+
+
+train$ChestPainType <- as.factor(train$ChestPainType)
+train$Sex <- as.factor(train$Sex)
+train$FastingBS <- as.factor(train$FastingBS)
+train$RestingECG <- as.factor(train$RestingECG)
+train$ExerciseAngina <- as.factor(train$ExerciseAngina)
+train$ST_Slope <- as.factor(train$ST_Slope)
+
+
+test$ChestPainType <- as.factor(test$ChestPainType)
+test$Sex <- as.factor(test$Sex)
+test$FastingBS <- as.factor(test$FastingBS)
+test$RestingECG <- as.factor(test$RestingECG)
+test$ExerciseAngina <- as.factor(test$ExerciseAngina)
+test$ST_Slope <- as.factor(test$ST_Slope)
+
+
+
+set.seed(445)
+lambda=seq(from=0,to=1,length.out=100)
+
+tmse<-0
+
+
+boost <- gbm(HeartDisease~.,data=temp_train,n.trees=1000,shrinkage=4,interaction.depth = 2 ,distribution = "bernoulli")
+
+
+gbm_grid =  expand.grid(interaction.depth = 1:5,
+                        n.trees = (1:6) * 500,
+                        shrinkage = c(0.001, 0.01, 0.1),
+                        n.minobsinnode = 10)
+
+
+
+
+
+
+
+
+
+
+
+```
+
