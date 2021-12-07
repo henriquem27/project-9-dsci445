@@ -11,7 +11,7 @@ test <- read.csv("test.csv")
 library(gbm)
 library(caret)
 
-
+set.seed(445)
 
 
 
@@ -71,15 +71,24 @@ plot(seat_gbm_tune)
 
 
 ```{r}
-boost <- gbm(HeartDisease~.,data=train,n.trees=1000,shrinkage=0.01,interaction.depth = 1 ,distribution = "bernoulli")
+boost <- gbm(HeartDisease~.,data=train,n.trees=500,shrinkage=0.01,interaction.depth = 1 ,distribution = "bernoulli")
 
 
-boostpred = ifelse(predict(boost,test, n.trees = 2000, "response") > 0.5, 
+boostpred = ifelse(predict(boost,test, n.trees = 500, "response") > 0.5, 
                              "1", "0")
 
 confm2<-table(predicted = boostpred, actual = test$HeartDisease)
 confm2
 error<-(confm2[1,1]+confm2[2,2])/sum(confm2)
 error
+```
+
+
+
+```{r}
+
+
+summary(boost)
+
 ```
 
