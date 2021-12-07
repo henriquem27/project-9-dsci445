@@ -12,7 +12,7 @@ test <- read.csv("test.csv")
 library(gbm)
 library(caret)
 
-
+set.seed(445)
 
 
 
@@ -49,8 +49,9 @@ lambda=seq(from=0,to=1,length.out=100)
 tmse<-0
 
 
-boost <- gbm(HeartDisease~.,data=temp_train,n.trees=1000,shrinkage=4,interaction.depth = 2 ,distribution = "bernoulli")
 
+oob = trainControl(method = "oob")
+cv_5 = trainControl(method = "cv", number = 5)
 
 gbm_grid =  expand.grid(interaction.depth = 1:5,
                         n.trees = (1:6) * 500,
@@ -58,13 +59,36 @@ gbm_grid =  expand.grid(interaction.depth = 1:5,
                         n.minobsinnode = 10)
 
 
+seat_gbm_tune = train(as.factor(HeartDisease) ~ ., data = train,
+                      method = "gbm",
+                      trControl = cv_5,
+                      verbose = FALSE,
+                      tuneGrid = gbm_grid)
+
+
+plot(seat_gbm_tune)
+
+```
+
+
+```{r}
+boost <- gbm(HeartDisease~.,data=train,n.trees=500,shrinkage=0.01,interaction.depth = 1 ,distribution = "bernoulli")
+
+
+boostpred = ifelse(predict(boost,test, n.trees = 500, "response") > 0.5, 
+                             "1", "0")
+
+confm2<-table(predicted = boostpred, actual = test$HeartDisease)
+confm2
+error<-(confm2[1,1]+confm2[2,2])/sum(confm2)
+error
+```
 
 
 
+```{r}
 
 
-
-
-
+summary(boost)
 
 ```
