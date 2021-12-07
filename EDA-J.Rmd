@@ -1,0 +1,36 @@
+---
+title: "EDA-J"
+author: "Jorie Alvis"
+date: "December 7, 2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+
+set.seed(445)
+
+heart_train = read.csv("train.csv")
+```
+
+```{r Cor}
+pairs(heart_train)
+pairs(heart_train[,-c(2,3,6,7,9,10,11)])
+```
+
+```{r Norm, echo=FALSE}
+qqnorm(heart_train$Age, main="QQ Plot of Age")
+qqline(heart_train$Age)
+
+qqnorm(heart_train$RestingBP, main="QQ Plot of Resting BP")
+qqline(heart_train$RestingBP)
+
+qqnorm(heart_train$Cholesterol, main="QQ Plot of Cholesterol")
+qqline(heart_train$Cholesterol)
+
+qqnorm(heart_train$MaxHR, main="QQ Plot of Max HR")
+qqline(heart_train$MaxHR)
+```
+
