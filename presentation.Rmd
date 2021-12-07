@@ -147,6 +147,16 @@ People with cardiovascular disease or who are at high cardiovascular risk (due t
 
 Jorie's LDA
 
+```{r LDA}
+LDA_model = lda(HeartDisease~., data=train)
+
+preds = predict(LDA_model, test)
+
+acc = sum(ifelse(preds$class == test$HeartDisease, 1, 0))/nrow(test)
+
+table("Preds"=preds$class, "True"=test$HeartDisease)
+```
+
 ## Random Forest
 
 
@@ -204,6 +214,15 @@ plot(reptree, index=1)
 ## SVM
 
 Jorie's SVM
+
+```{r SVM}
+SVM_radial = svm(HeartDisease~., data=train, kernel="radial", gamma=0.25, cost=0.4)
+
+preds = predict(SVM_radial, test, type="class")
+acc = sum(ifelse(preds == test$HeartDisease, 1, 0))/nrow(test)
+
+table(test$HeartDisease, preds)
+```
 
 ## (the new thing)
 
