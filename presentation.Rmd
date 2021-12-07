@@ -88,6 +88,56 @@ People with cardiovascular disease or who are at high cardiovascular risk (due t
 (https://www.cdc.gov/nchs/fastats/leading-causes-of-death.htm, https://www.kaggle.com/fedesoriano/heart-failure-prediction)
 
 
+## Data
+
+- There are 918 observations which we split into 60/40 for training and validation.
+
+- 12 predictors are included in the data which are:
+
++ Age
+
++ Sex M/F
+
++ Chest Pain Type:
+
+++ TA: Typical Angina
+
+++ ATA: Atypical Angina
+
+++ NAP: Non-Anginal Pain
+
+++ ASY: Asymptomatic
+
++ Resting Blood Pressure [mm Hg]
+
++ Cholesterol [mm/dl]
+
++ Fasting Blood Sugar Y/N
+
++ Resting Electrocardiogram
+
++ Normal: Normal
+
+++ ST: Having ST-T Wave abnormality
+
+++ LVH: Showing probable or definite left ventricular hypertrophy.
+
++ Max HR: Maximum heart rate achieved.
+
++ Exercise Angina: exercise-induced angine Y/N
+
++ Old peak: Oldpeak= ST value of depression
+
++ ST_Slope: 
+
+++ Up sloping(up)
+
+++ Flat(flat)
+
+++ Down sloping (down)
+
++ Heart Disease: [1:Heart Disease, 0: Normal]
+ 
 
 
 ## LDA
@@ -114,15 +164,24 @@ kable(confm2)
 paste("the overall fraction of correct predictions in the test dataset is :",(confm2[1,1]+confm2[2,2])/sum(confm2))
 
 rf_fit
+
+imp<-data.frame(rf_fit$importance)
+
+imp$variables <- rownames(imp)
+rownames(imp) <- 1:nrow(imp)
+
+imp <- imp[order(imp$MeanDecreaseAccuracy),]
+
+ggplot(imp)+geom_col(aes(x=variables,y=MeanDecreaseAccuracy))+coord_flip()+labs(title="Variable Importance",y=" Mean decrease in Accuracy", x= " Variable")+scale_y_continuous(labels = scales::percent_format())
 ```
 
 
 ## Representative Tree
--Following the paper by  Banerjee, et al.(2011) and the package reprtree we can get a representative tree from the random forest.
--This tree is calculated using a measure of similarity in which 2 trees are similar if they have the same prediction for all observations.
--Using this idea on the random forest we get the following tree:
+- Following the paper by  Banerjee, et al.(2011) and the package reprtree we can get a representative tree from the random forest.
+- This tree is calculated using a measure of similarity in which 2 trees are similar if they have the same prediction for all observations.
+- Using this idea on the random forest we get the following tree:
 
-```{r}
+```{r, fig.height=5,fig.width=10}
 reptree <- ReprTree(rf_fit, train, metric='d2')
 plot(reptree, index=1)
 
