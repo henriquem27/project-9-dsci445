@@ -1,3 +1,4 @@
+@@ -1,70 +0,0 @@
 ---
 title: "Boosting"
 author: "Henrique"
@@ -67,4 +68,3 @@ gbm_grid =  expand.grid(interaction.depth = 1:5,
 
 
 ```
-
