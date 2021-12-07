@@ -43,6 +43,8 @@ library(knitr)
 library(class)
 library(fastDummies)
 library(reprtree)
+library(MASS)
+library(e1071)
 
 
 
@@ -155,6 +157,11 @@ preds = predict(LDA_model, test)
 acc = sum(ifelse(preds$class == test$HeartDisease, 1, 0))/nrow(test)
 
 table("Preds"=preds$class, "True"=test$HeartDisease)
+
+overall_LDA <- acc
+overall_LDA
+
+LDA_model
 ```
 
 ## Random Forest
