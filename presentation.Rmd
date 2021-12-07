@@ -88,7 +88,7 @@ People with cardiovascular disease or who are at high cardiovascular risk (due t
 (https://www.cdc.gov/nchs/fastats/leading-causes-of-death.htm, https://www.kaggle.com/fedesoriano/heart-failure-prediction)
 
 
-## Data
+## Data {.smaller}
 
 - There are 918 observations which we split into 60/40 for training and validation.
 
@@ -114,9 +114,12 @@ People with cardiovascular disease or who are at high cardiovascular risk (due t
 
 + Fasting Blood Sugar Y/N
 
+## Data {.smaller}
+
 + Resting Electrocardiogram
 
-+ Normal: Normal
+
+++ Normal: Normal
 
 ++ ST: Having ST-T Wave abnormality
 
@@ -144,9 +147,8 @@ People with cardiovascular disease or who are at high cardiovascular risk (due t
 
 Jorie's LDA
 
-## RF
+## Random Forest
 
-Henrique's RF
 
 
 ```{r}
@@ -172,8 +174,16 @@ rownames(imp) <- 1:nrow(imp)
 
 imp <- imp[order(imp$MeanDecreaseAccuracy),]
 
-ggplot(imp)+geom_col(aes(x=variables,y=MeanDecreaseAccuracy))+coord_flip()+labs(title="Variable Importance",y=" Mean decrease in Accuracy", x= " Variable")+scale_y_continuous(labels = scales::percent_format())
 ```
+
+## Random Forest
+
+- Variable importance shows.
+
+```{r}
+ggplot(imp)+geom_col(aes(x=variables,y=MeanDecreaseAccuracy,fill=variables))+coord_flip()+labs(title="Variable Importance",y=" Mean decrease in Accuracy", x= " Variable")+scale_y_continuous(labels = scales::percent_format())
+```
+
 
 
 ## Representative Tree
@@ -181,8 +191,12 @@ ggplot(imp)+geom_col(aes(x=variables,y=MeanDecreaseAccuracy))+coord_flip()+labs(
 - This tree is calculated using a measure of similarity in which 2 trees are similar if they have the same prediction for all observations.
 - Using this idea on the random forest we get the following tree:
 
-```{r, fig.height=5,fig.width=10}
+
+
+## Tree
+```{r fig.height=7, fig.width=15, message=FALSE, warning=FALSE,echo=FALSE}
 reptree <- ReprTree(rf_fit, train, metric='d2')
+
 plot(reptree, index=1)
 
 ```
@@ -306,7 +320,7 @@ mean(knn_pred_1 !=test$HeartDisease)
 
 
 ## Bagging
-```{r}
+```{r,echo=FALSE,warning=FALSE,fig.width=6,fig.height=3}
 
 bagging <- randomForest(HeartDisease ~ .,data = train, mtry = 19, ntree = 500, type = "class", 
                         importance = TRUE,
@@ -332,17 +346,21 @@ overall_bag #over all correct
 
 
 #Visulizaton of bagging
-VI <- data.frame(var=names(test[,-1]), imp=varImp(bagging))
+VI <- data.frame(var=names(test[,-12]), imp=varImp(bagging))
 
 #sort variable importance descending
 VI_plot <- VI[order(VI$imp.0, decreasing=TRUE),]
 
 #visualize variable importance with horizontal bar plot
-barplot(VI_plot$imp.0,
-        names.arg=rownames(VI_plot),
-        horiz=TRUE,
-        col='steelblue',
-        xlab='Variable Importance')
+#barplot(VI_plot$imp.0,
+   #     names.arg=rownames(VI_plot),
+    #    horiz=TRUE,
+     #   col='steelblue',
+      #  xlab='Variable Importance')
+
+
+ggplot(VI_plot)+geom_col(aes(x=(rownames(VI_plot)),y=imp.0,fill=rownames(VI_plot)))+coord_flip()+guides(fill=FALSE)+
+  labs(x="Variable Name",y="Importance")
 
 ```
 
