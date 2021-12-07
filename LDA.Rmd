@@ -45,6 +45,7 @@ acc = sum(ifelse(preds$class == heart_train$HeartDisease, 1, 0))/nrow(heart_trai
 
 table(preds$class, heart_train$HeartDisease)
 acc
+LDA_model
 ```
 
 ```{r Testing}
