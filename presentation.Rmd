@@ -132,7 +132,7 @@ People with cardiovascular disease or who are at high cardiovascular risk (due t
 
 + Old peak: Oldpeak= ST value of depression
 
-+ ST_Slope: 
++ ST_Slope during exercise: 
 
 ++ Up sloping(up)
 
@@ -183,7 +183,7 @@ LDA_model
 ```
 ## KNN
 
-```{r}
+```{r message=FALSE, warning=FALSE,echo=FALSE}
 
 temp_train <- dummy_cols(train, select_columns = c("Sex", "ChestPainType", "RestingECG", "ST_Slope", "ExerciseAngina") )
 temp_test <- dummy_cols(test, select_columns = c("Sex", "ChestPainType", "RestingECG", "ST_Slope", "ExerciseAngina"))
@@ -219,7 +219,7 @@ mean(knn_pred_1 !=test$HeartDisease)
 ## LASSO
 
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 
 train_matrix <- model.matrix(HeartDisease ~ ., data = train)
 test_matrix <- model.matrix(HeartDisease ~ ., data = test)
@@ -241,9 +241,9 @@ num_zeros <-cv_lasso$nzero[which.min(cv_lasso$cvm)]
 
 
 # MSE values to use:
-best_lambda_lasso
-lasso_MSE
-num_zeros
+paste("Tuning Lambda",best_lambda_lasso)
+#lasso_MSE
+paste("Number of zeros",num_zeros)
 
 
 
@@ -294,7 +294,7 @@ bagging <- randomForest(HeartDisease ~ .,data = train, mtry = 19, ntree = 500, t
 #Confusion Matrix
 predict_bag <- predict(bagging, newdata = test)
 predicted_bag <- ifelse(predict_bag>0.5,1,0)
-confm_bag<-table(predict_bag,test$HeartDisease,)
+confm_bag<-table(predicted_bag,test$HeartDisease)
 
 
 #MSE
@@ -437,7 +437,7 @@ plot(gbm_tune)
 ```
 
 
-- Tuning Parmeters Choosen= 600 trees, shrinkage=0.01, interaction= 2.
+- Tuning Parameters: n= 600 trees, shrinkage=0.01, interaction= 2.
 
 ```{r}
 boost <- gbm(HeartDisease~.,data=train,n.trees=600,shrinkage=0.01,interaction.depth = 2 ,distribution = "bernoulli")
@@ -449,6 +449,7 @@ confboost<-table(predicted = boostpred, actual = test$HeartDisease)
 confboost
 error<-(confboost[1,1]+confboost[2,2])/sum(confboost)
 overall_boost <- error
+overall_boost
 ```
 
 
@@ -500,7 +501,7 @@ table(preds,test$HeartDisease)
 
 overall_SVM <- acc
 
-paste("the overall fraction of correct predictions in the test dataset is :", acc)
+paste("The overall fraction of correct predictions in the test dataset is :", acc)
 ```
 
 
