@@ -87,4 +87,35 @@ table(heart_test$HeartDisease, preds_radial)
 radial_mse = sum((heart_test$HeartDisease-as.integer(preds_radial))^2)/nrow(heart_test) #1.253
 ```
 
+
+{r SVM}
+
+train <- read.csv("train.csv")
+test <- read.csv("test.csv")
+
+
+train$ChestPainType <- as.factor(train$ChestPainType)
+train$Sex <- as.factor(train$Sex)
+train$FastingBS <- as.factor(train$FastingBS)
+train$RestingECG <- as.factor(train$RestingECG)
+train$ExerciseAngina <- as.factor(train$ExerciseAngina)
+train$ST_Slope <- as.factor(train$ST_Slope)
+
+
+
+
+
+SVM_radial = svm(HeartDisease~., data=train, kernel="radial", gamma=0.25, cost=0.4)
+
+preds = predict(SVM_radial, test, type="class")
+acc = sum(ifelse(preds == test$HeartDisease, 1, 0))/nrow(test)
+
+table(preds,test$HeartDisease)
+
+overall_SVM <- acc
+
+paste("The overall fraction of correct predictions in the test dataset is :", acc)
+
+
+
 We can see from the confusion matrix of our Radial SVM that there is little bias in the miss-classifications while the MSE is `r round(radial_mse, 4)`.

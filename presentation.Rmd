@@ -132,7 +132,7 @@ People with cardiovascular disease or who are at high cardiovascular risk (due t
 
 + Old peak: Oldpeak= ST value of depression
 
-+ ST_Slope during exercise: 
++ ST_Slope (Slope of the peak exercise ST segment): 
 
 ++ Up sloping(up)
 
@@ -243,7 +243,7 @@ num_zeros <-cv_lasso$nzero[which.min(cv_lasso$cvm)]
 # MSE values to use:
 paste("Tuning Lambda",best_lambda_lasso)
 #lasso_MSE
-paste("Number of zeros",num_zeros)
+#paste("Number of zeros",num_zeros)
 
 
 
@@ -470,43 +470,79 @@ ggplot(summa)+geom_col(aes(x=var,y=rel.inf,fill=var))+coord_flip()+labs(y="Relat
 ## SVM
 
 
-```{r SVM}
-
-train <- read.csv("train.csv")
-test <- read.csv("test.csv")
 
 
-train$ChestPainType <- as.factor(train$ChestPainType)
-train$Sex <- as.factor(train$Sex)
-train$FastingBS <- as.factor(train$FastingBS)
-train$RestingECG <- as.factor(train$RestingECG)
-train$ExerciseAngina <- as.factor(train$ExerciseAngina)
-train$ST_Slope <- as.factor(train$ST_Slope)
+```{r Data, include=FALSE}
+heart_train = read.csv("train.csv")
 
-
-test$ChestPainType <- as.factor(test$ChestPainType)
-test$Sex <- as.factor(test$Sex)
-test$FastingBS <- as.factor(test$FastingBS)
-test$RestingECG <- as.factor(test$RestingECG)
-test$ExerciseAngina <- as.factor(test$ExerciseAngina)
-test$ST_Slope <- as.factor(test$ST_Slope)
-
-
-SVM_radial = svm(HeartDisease~., data=train, kernel="radial", gamma=0.25, cost=0.4)
-
-preds = predict(SVM_radial, test, type="class")
-acc = sum(ifelse(preds == test$HeartDisease, 1, 0))/nrow(test)
-
-table(preds,test$HeartDisease)
-
-overall_SVM <- acc
-
-paste("The overall fraction of correct predictions in the test dataset is :", acc)
+heart_train$Sex = factor(heart_train$Sex)
+heart_train$ChestPainType = factor(heart_train$ChestPainType)
+heart_train$FastingBS = factor(heart_train$FastingBS)
+heart_train$RestingECG = factor(heart_train$RestingECG)
+heart_train$ExerciseAngina = factor(heart_train$ExerciseAngina)
+heart_train$ST_Slope = factor(heart_train$ST_Slope)
+heart_train$HeartDisease = factor(heart_train$HeartDisease)
 ```
 
+```{r SVM_Linear}
+# Train a Linear SVM and find the best cost value
+# We set scale=TRUE becuase the continuous varibles seem to be normally distrabuted (from EDA)
+svm_linear_cv = tune(svm, HeartDisease~., scale=TRUE, kernel="linear", data=heart_train,
+                      ranges = list(cost = seq(0.1, 5, by = 0.1)))
+svm_linear = svm_linear_cv$best.model
+
+preds = predict(svm_linear, heart_train, type="class")
 
 
+```
 
+```{r SVM_Polynomial}
+# Train a Polynomial SVM
+# Find the best cost and degree parameter
+svm_poly_cv = tune(svm, HeartDisease~., scale=TRUE, kernel="polynomial", data=heart_train,
+                      ranges = list(cost = seq(0.1, 5, by = 0.1),
+                                    degree = c(2,3,4, 5)))
+svm_poly = svm_poly_cv$best.model
+
+preds = predict(svm_poly, heart_train, type="class")
+
+
+```
+
+```{r SVM_Radial}
+# Train a Radial SVM
+# Find the best cost and gamma parameter
+svm_radial_cv = tune(svm, HeartDisease~., scale=TRUE, kernel="radial", data=heart_train,
+                      ranges = list(cost = seq(0.2, 5, by = 0.2),
+                                    gamma = seq(0.25, 3, by = 0.25)))
+svm_radial = svm_radial_cv$best.model
+
+preds = predict(svm_radial, heart_train, type="class")
+
+
+```
+
+```{r Testing}
+heart_test = read.csv("test.csv")
+
+preds_liner = predict(svm_linear, heart_test, type="class")
+acc_liner = sum(ifelse(preds_liner == heart_test$HeartDisease, 1, 0))/nrow(heart_test)
+
+preds_poly = predict(svm_poly, heart_test, type="class")
+acc_poly = sum(ifelse(preds_poly == heart_test$HeartDisease, 1, 0))/nrow(heart_test)
+
+preds_radial = predict(svm_radial, heart_test, type="class")
+acc_radial = sum(ifelse(preds_radial == heart_test$HeartDisease, 1, 0))/nrow(heart_test) #87.2%
+
+c("Linear Svm" = acc_liner, "Polynomial Svm" = acc_poly, "Radial SVM" = acc_radial)
+```
+
+- Confusion Matrix for Radial:
+
+```{r Best_SVM}
+table(heart_test$HeartDisease, preds_radial)
+overall_SVM <- acc_radial
+```
 
 
 
@@ -524,7 +560,7 @@ paste("The overall fraction of correct predictions in the test dataset is :", ac
 
 ```{r}
 library(knitr)
-df1 = data.frame(Method = c("Logistic Regression","LDA","KNN","LASSO","Bagging","Random Forest","Boosting","SVM"),  MSE = c(overall_logit,overall_LDA,overall_knn_1,overall_lasso,overall_bag,overall_RF,overall_boost,overall_SVM))
+df1 = data.frame(Method = c("Logistic Regression","LDA","KNN","LASSO","Bagging","Random Forest","Boosting","SVM"),  Overall_Correct_Pred.= c(overall_logit,overall_LDA,overall_knn_1,overall_lasso,overall_bag,overall_RF,overall_boost,overall_SVM))
 
 kable(df1)
 

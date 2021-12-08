@@ -1,4 +1,4 @@
-@@ -1,70 +0,0 @@
+
 ---
 title: "Boosting"
 author: "Henrique"
