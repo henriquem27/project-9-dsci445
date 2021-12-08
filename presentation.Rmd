@@ -157,7 +157,7 @@ predicted2 <- ifelse(predicted2>0.5,1,0)
 confm2<-table(predicted=predicted2,True=test$HeartDisease)
 kable(confm2)
 
-paste("The overall fraction of correct predictions in the test dataset is :",(confm2[1,1]+confm2[2,2])/sum(confm2))
+paste("Accuracy :",(confm2[1,1]+confm2[2,2])/sum(confm2))
 
 overall_logit <- (confm2[1,1]+confm2[2,2])/sum(confm2)
 
@@ -321,7 +321,7 @@ VI <- data.frame(var=names(test[,-12]), imp=varImp(bagging))
       #  xlab='Variable Importance')
 
 
-ggplot(VI)+geom_col(aes(x=var,y=Overall,fill=var))+coord_flip()+guides(fill=FALSE)+
+ggplot(VI)+geom_col(aes(x=var,y=Overall,fill=var))+coord_flip()+guides(fill="none")+
   labs(x="Variable Name",y="Importance")
 ```
 
@@ -342,7 +342,7 @@ confm2<-table(predicted=rf,True=true)
 confm2
 
 
-paste("the overall fraction of correct predictions in the test dataset is :",(confm2[1,1]+confm2[2,2])/sum(confm2))
+paste("Accuracy :",(confm2[1,1]+confm2[2,2])/sum(confm2))
 
 
 overall_RF <- (confm2[1,1]+confm2[2,2])/sum(confm2)
@@ -537,7 +537,7 @@ acc_radial = sum(ifelse(preds_radial == heart_test$HeartDisease, 1, 0))/nrow(hea
 c("Linear Svm" = acc_liner, "Polynomial Svm" = acc_poly, "Radial SVM" = acc_radial)
 ```
 
-- Confusion Matrix for Radial:
+- Confusion Matrix for Radial Kernel:
 
 ```{r Best_SVM}
 table(heart_test$HeartDisease, preds_radial)
@@ -560,7 +560,7 @@ overall_SVM <- acc_radial
 
 ```{r}
 library(knitr)
-df1 = data.frame(Method = c("Logistic Regression","LDA","KNN","LASSO","Bagging","Random Forest","Boosting","SVM"),  Overall_Correct_Pred.= c(overall_logit,overall_LDA,overall_knn_1,overall_lasso,overall_bag,overall_RF,overall_boost,overall_SVM))
+df1 = data.frame(Method = c("Logistic Regression","LDA","KNN","LASSO","Bagging","Random Forest","Boosting","SVM"),  Accuracy= c(overall_logit,overall_LDA,overall_knn_1,overall_lasso,overall_bag,overall_RF,overall_boost,overall_SVM))
 
 kable(df1)
 
