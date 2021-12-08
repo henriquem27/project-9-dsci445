@@ -45,6 +45,7 @@ library(fastDummies)
 library(reprtree)
 library(MASS)
 library(e1071)
+library(gbm)
 
 
 
@@ -147,7 +148,6 @@ People with cardiovascular disease or who are at high cardiovascular risk (due t
 
 ## LDA
 
-Jorie's LDA
 
 ```{r LDA}
 LDA_model = lda(HeartDisease~., data=train)
@@ -174,7 +174,7 @@ rf_fit <- randomForest(as.factor(HeartDisease) ~ ., data = train, mtry = sqrt(nc
 true <- test$HeartDisease
 rf <- predict(rf_fit,test,type="class")
 
-predicted2 <- ifelse(rf>0.5,1,0)
+
 
 confm2<-table(predicted=rf,True=true)
 kable(confm2)
@@ -182,6 +182,8 @@ kable(confm2)
 
 paste("the overall fraction of correct predictions in the test dataset is :",(confm2[1,1]+confm2[2,2])/sum(confm2))
 
+
+overall_RF <- (confm2[1,1]+confm2[2,2])/sum(confm2)
 rf_fit
 
 imp<-data.frame(rf_fit$importance)
@@ -195,22 +197,27 @@ imp <- imp[order(imp$MeanDecreaseAccuracy),]
 
 ## Random Forest
 
-- Variable importance shows.
+- ST_Slope
+- 
 
 ```{r}
-ggplot(imp)+geom_col(aes(x=variables,y=MeanDecreaseAccuracy,fill=variables))+coord_flip()+labs(title="Variable Importance",y=" Mean decrease in Accuracy", x= " Variable")+scale_y_continuous(labels = scales::percent_format())
+ggplot(imp)+geom_col(aes(x=variables,y=MeanDecreaseAccuracy,fill=variables))+coord_flip()+labs(title="Variable Importance",y=" Mean decrease in Accuracy", x= " Variable")+scale_y_continuous(labels = scales::percent_format())+guides(fill="none")
 ```
 
 
 
 ## Representative Tree
-- Following the paper by  Banerjee, et al.(2011) and the package reprtree we can get a representative tree from the random forest.
-- This tree is calculated using a measure of similarity in which 2 trees are similar if they have the same prediction for all observations.
+- Following the paper "Identifying representative Trees From Ensembles"  by  Banerjee, et al.(2011) and the package reprtree we can get a representative tree from the random forest.
+
+- This tree is calculated using a measure of similarity, in which 2 trees are similar if they have the same prediction for all observations.
+
+- The representative tree is then choosen based on its averaged similarity between all other trees.
+
 - Using this idea on the random forest we get the following tree:
 
 
 
-## Tree
+## Representative Tree Plot
 ```{r fig.height=7, fig.width=15, message=FALSE, warning=FALSE,echo=FALSE}
 reptree <- ReprTree(rf_fit, train, metric='d2')
 
@@ -220,7 +227,6 @@ plot(reptree, index=1)
 
 ## SVM
 
-Jorie's SVM
 
 ```{r SVM}
 SVM_radial = svm(HeartDisease~., data=train, kernel="radial", gamma=0.25, cost=0.4)
@@ -228,22 +234,22 @@ SVM_radial = svm(HeartDisease~., data=train, kernel="radial", gamma=0.25, cost=0
 preds = predict(SVM_radial, test, type="class")
 acc = sum(ifelse(preds == test$HeartDisease, 1, 0))/nrow(test)
 
-table(test$HeartDisease, preds)
+table(predicted=preds,true=test$HeartDisease)
+
+overall_SVM <- acc
+
+paste("Accuracy", acc)
 ```
 
-## (the new thing)
-
-Henrique's new thing insted of PCA
 
 ## Logistic Regression
 
-Henrique's Logisic Regression
 
 
 
 ```{r}
 model_glm = glm(HeartDisease ~ ., data = train, family = "binomial")
-#summary(model_glm)
+summary(model_glm)
 
 
 predicted2 <- predict(model_glm, newdata = test, "response")
@@ -253,15 +259,85 @@ kable(confm2)
 
 paste("The overall fraction of correct predictions in the test dataset is :",(confm2[1,1]+confm2[2,2])/sum(confm2))
 
-
- 
- #MSE
+overall_logit <- (confm2[1,1]+confm2[2,2])/sum(confm2)
 
 ```
 
 ## Boosting
 
-Jories's Boosting
+```{r}
+
+train <- read.csv("train.csv")
+test <- read.csv("test.csv")
+
+
+train$ChestPainType <- as.factor(train$ChestPainType)
+train$Sex <- as.factor(train$Sex)
+train$FastingBS <- as.factor(train$FastingBS)
+train$RestingECG <- as.factor(train$RestingECG)
+train$ExerciseAngina <- as.factor(train$ExerciseAngina)
+train$ST_Slope <- as.factor(train$ST_Slope)
+
+
+test$ChestPainType <- as.factor(test$ChestPainType)
+test$Sex <- as.factor(test$Sex)
+test$FastingBS <- as.factor(test$FastingBS)
+test$RestingECG <- as.factor(test$RestingECG)
+test$ExerciseAngina <- as.factor(test$ExerciseAngina)
+test$ST_Slope <- as.factor(test$ST_Slope)
+
+
+
+set.seed(445)
+
+
+
+
+oob = trainControl(method = "oob")
+cv_5 = trainControl(method = "cv", number = 5)
+
+gbm_grid =  expand.grid(interaction.depth = 1:5,
+                        n.trees = (1:5) * 200,
+                        shrinkage = c(0.01,0.015,0.1),
+                        n.minobsinnode = 10)
+
+
+gbm_tune = train(as.factor(HeartDisease) ~ ., data = train,
+                      method = "gbm",
+                      trControl = cv_5,
+                      verbose = FALSE,
+                      tuneGrid = gbm_grid)
+
+
+plot(gbm_tune)
+
+```
+
+
+```{r}
+boost <- gbm(HeartDisease~.,data=train,n.trees=600,shrinkage=0.01,interaction.depth = 2 ,distribution = "bernoulli")
+
+
+boostpred = ifelse(predict(boost,test, n.trees = 500, "response") > 0.5, "1", "0")
+
+confboost<-table(predicted = boostpred, actual = test$HeartDisease)
+confboost
+error<-(confboost[1,1]+confboost[2,2])/sum(confboost)
+overall_boost <- error
+```
+
+
+
+```{r,include=FALSE}
+summa<-summary(boost)
+```
+
+
+
+
+```{r}
+ggplot(summa)+geom_col(aes(x=var,y=rel.inf,fill=var))+coord_flip()+labs(y="Relative Influence", x= " Variable")+guides(fill="none")
+```
 
 ## LASSO
 
@@ -347,6 +423,25 @@ mean(knn_pred_1 !=test$HeartDisease)
 
 ## Bagging
 ```{r,echo=FALSE,warning=FALSE,fig.width=6,fig.height=3}
+train <- read.csv("train.csv")
+test <- read.csv("test.csv")
+
+
+train$ChestPainType <- as.factor(train$ChestPainType)
+train$Sex <- as.factor(train$Sex)
+train$FastingBS <- as.factor(train$FastingBS)
+train$RestingECG <- as.factor(train$RestingECG)
+train$ExerciseAngina <- as.factor(train$ExerciseAngina)
+train$ST_Slope <- as.factor(train$ST_Slope)
+
+
+test$ChestPainType <- as.factor(test$ChestPainType)
+test$Sex <- as.factor(test$Sex)
+test$FastingBS <- as.factor(test$FastingBS)
+test$RestingECG <- as.factor(test$RestingECG)
+test$ExerciseAngina <- as.factor(test$ExerciseAngina)
+test$ST_Slope <- as.factor(test$ST_Slope)
+
 
 bagging <- randomForest(HeartDisease ~ .,data = train, mtry = 19, ntree = 500, type = "class", 
                         importance = TRUE,
@@ -359,7 +454,7 @@ bagging <- randomForest(HeartDisease ~ .,data = train, mtry = 19, ntree = 500, t
 predict_bag <- predict(bagging, newdata = test)
 predicted_bag <- ifelse(predict_bag>0.5,1,0)
 confm_bag<-table(predict_bag,test$HeartDisease)
-confm_bag
+
 
 #MSE
 bagging_mse <- mean((predict_bag - test$HeartDisease)^2) 
@@ -375,7 +470,7 @@ overall_bag #over all correct
 VI <- data.frame(var=names(test[,-12]), imp=varImp(bagging))
 
 #sort variable importance descending
-VI_plot <- VI[order(VI$imp.0, decreasing=TRUE),]
+#VI_plot <- VI[order(VI$imp.0, decreasing=TRUE),]
 
 #visualize variable importance with horizontal bar plot
 #barplot(VI_plot$imp.0,
@@ -385,26 +480,25 @@ VI_plot <- VI[order(VI$imp.0, decreasing=TRUE),]
       #  xlab='Variable Importance')
 
 
-ggplot(VI_plot)+geom_col(aes(x=(rownames(VI_plot)),y=imp.0,fill=rownames(VI_plot)))+coord_flip()+guides(fill=FALSE)+
+ggplot(VI)+geom_col(aes(x=var,y=Overall,fill=var))+coord_flip()+guides(fill=FALSE)+
   labs(x="Variable Name",y="Importance")
-
 ```
 
 
-## Comparision of all method's MSE
 
-Chart with all MSE
+## Results
+
+- What method should be choosen?
 
 ```{r}
 library(knitr)
-df1 = data.frame(Method = c('LDA', 'RF', 'SVM', 'new THING', 'Logistic Regression', 'Boosting', 'LASSO', 'PLS', 'Bagging'),  MSE = c(0,0,0,0,0.1498638,0,0,0.1054 ,0.1165492))
+df1 = data.frame(Method = c("Logistic Regression","LDA","KNN","LASSO","Bagging","Random Forest","Boosting","SVM"),  MSE = c(overall_logit,overall_LDA,overall_knn_1,overall_lasso,overall_bag,overall_RF,overall_boost,overall_SVM))
 
 kable(df1)
 
 ```
 
-## Conclusion
 
-the METHOD worked best, with an MSE of SOMETHING
+
 
 

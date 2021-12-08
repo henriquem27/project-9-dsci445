@@ -28,8 +28,8 @@ library(readr)
 
 
 #60/40 split
-train <-train
-test <- test
+train <-read.csv("train.csv")
+test <- read.csv("test.csv")
 
 
 ```

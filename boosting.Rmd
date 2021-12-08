@@ -44,9 +44,7 @@ test$ST_Slope <- as.factor(test$ST_Slope)
 
 
 set.seed(445)
-lambda=seq(from=0,to=1,length.out=100)
 
-tmse<-0
 
 
 
@@ -54,8 +52,8 @@ oob = trainControl(method = "oob")
 cv_5 = trainControl(method = "cv", number = 5)
 
 gbm_grid =  expand.grid(interaction.depth = 1:5,
-                        n.trees = (1:6) * 500,
-                        shrinkage = c(0.001, 0.01, 0.1),
+                        n.trees = (1:5) * 200,
+                        shrinkage = c(0.01,0.015,0.1),
                         n.minobsinnode = 10)
 
 
@@ -72,7 +70,7 @@ plot(seat_gbm_tune)
 
 
 ```{r}
-boost <- gbm(HeartDisease~.,data=train,n.trees=500,shrinkage=0.01,interaction.depth = 1 ,distribution = "bernoulli")
+boost <- gbm(HeartDisease~.,data=train,n.trees=600,shrinkage=0.01,interaction.depth = 2 ,distribution = "bernoulli")
 
 
 boostpred = ifelse(predict(boost,test, n.trees = 500, "response") > 0.5, 
@@ -87,8 +85,12 @@ error
 
 
 ```{r}
+summa<-summary(boost)
+```
 
 
-summary(boost)
 
+
+```{r}
+ggplot(summa)+geom_col(aes(x=var,y=rel.inf,fill=var))+coord_flip()+labs(title="Variable Importance",y=" Mean decrease in Accuracy", x= " Variable")+scale_y_continuous(labels = scales::percent_format())+guides(fill="none")
 ```

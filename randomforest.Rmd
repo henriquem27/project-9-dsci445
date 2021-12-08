@@ -76,7 +76,7 @@ rf_fit <- randomForest(as.factor(HeartDisease) ~ ., data = train, mtry = sqrt(nc
 true <- test$HeartDisease
 rf <- predict(rf_fit,test,type="class")
 
-predicted2 <- ifelse(rf>0.5,1,0)
+
 
 confm2<-table(predicted=rf,True=true)
 confm2
