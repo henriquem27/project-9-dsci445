@@ -36,7 +36,7 @@ When using the LASSO method, it was important to select family = "binomial" for 
 
 ## Bagging
 
-This will be the section on Bagging. Include discussion on how & why you chose to do it the way you did it. 
+The bagging model was preformed with 500 trees and identified the most important variable as being ST_Slope followed by Chest Pain Type. Interestingly, resting ECG and Resting BP both had negative importance. This means if we remove those two features, we would improve model performance. As other methods found resting ECG and Resting BP to be among the least important variable, it would be worth taking the time to remove them and see if it improves the accuracy rates for our data. 
 
 ## Bosting
 
