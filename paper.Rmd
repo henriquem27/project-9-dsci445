@@ -1,0 +1,66 @@
+---
+title: "Group 9 Paper"
+author: "Henrique Magalhaes Rio , Oriana Meldrum, Jorie Alvis"
+date: "12/11/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+
+In 2019 659,041 Americans died of heart disease. Four out of five heart disease deaths are due to heart attacks and strokes, and one-third of these deaths occur prematurely in people under 70 years of age. Heart failure is a common event caused by heart disease and this dataset we used contains 11 variables that can be used to predict a possible heart disease.
+
+People with cardiovascular disease or who are at high cardiovascular risk (due to the presence of one or more risk factors) need early detection and management so machine learning techniques are of great clinical interest for early detection. 
+
+# Methods
+
+## Logistic Regression
+
+This will be the section on Logistic Regression. Include discussion on how & why you chose to do it the way you did it. 
+
+## LDA
+
+This will be the section on LDA. Include discussion on how & why you chose to do it the way you did it. 
+
+## KNN
+
+
+K-nearest Neighbors is useful for both regression and classification. An object will be classified by a vote of the nearest k neighbors. The object is assigned to the class most common to those k neighbors. For this project, k was selected by cross validation.  The best accuracy comes from a k of 23 with and accuracy of 0.6878024. Technically both k=1 and k=4 have higher accuracy, but we are avoiding k=1 using as any outlines would create a skew and in certain types of classification problems, our research shower it was better to avoid using an odd number as this can tie votes. With an prediction rate of only 0.6757493 had the lowest overall correct prediction rate. 
+
+## LASSO
+
+When using the LASSO method, it was important to select family = "binomial" for the classification problem. The tuning lambda value was selected through cross validation. 
+
+## Bagging
+
+This will be the section on Bagging. Include discussion on how & why you chose to do it the way you did it. 
+
+## Bosting
+
+This will be the section on Boosting. Include discussion on how & why you chose to do it the way you did it. 
+
+## Random Forest
+
+This will be the section on Random Forest. Include discussion on how & why you chose to do it the way you did it. 
+
+## Representative Tree
+
+This will be the section on Representative Tree. Include discussion on how & why you chose to do it the way you did it. 
+
+## SVM
+
+This will be the section on SVM. Include discussion on how & why you chose to do it the way you did it. 
+
+# Methods That Didn't Work
+
+This will be the section on methods we considered but did work. Include discussion on how & why you didn't chose to do it. 
+
+# Conclusion
+
+## Future Proposal
+
+It would be interesting to re-try this project, removing the ST-Slope value. As we learned from industry professionals, the ST Slope is nearly always associated with some type of heart rhythm anomaly, and thus is frequently present in cases of heart disease. Many of our models indicated the ST Slope as the number one predictor for heart disease due to this strong association. 
+
