@@ -113,7 +113,7 @@ This will be the section on Bagging. Include discussion on how & why you chose t
 
 
 
-```{r}
+```{r,echo=FALSE}
 train <- read.csv("train.csv")
 test <- read.csv("test.csv")
 
@@ -145,7 +145,7 @@ cv_5 = trainControl(method = "cv", number = 5)
 
 gbm_grid =  expand.grid(interaction.depth = 1:5,
                         n.trees = (1:5) * 200,
-                        shrinkage = c(0.01,0.015,0.1),
+                        shrinkage = c(0.001,0.01,0.015,0.1),
                         n.minobsinnode = 10)
 
 
@@ -154,12 +154,45 @@ gbm_tune = train(as.factor(HeartDisease) ~ ., data = train,
                       trControl = cv_5,
                       verbose = FALSE,
                       tuneGrid = gbm_grid)
-
-
 plot(gbm_tune)
+
+gbm_tune$bestTune
+
+``` 
+
+
+In order to tune tree boosting method I used a 5 fold cross-validation on the training data set, from the plot it seems that there is a spike on the on the accuracy when using shrinkage with 0.01, 400 trees and a interaction depth of 2. It should also be noted that several other ranges of the tune parameters were tested but for simplicity sake on the range on the plot was left which included the best one overall.
+
+
+
+
+
+
+```{r,echo=FALSE}
+boost <- gbm(HeartDisease~.,data=train,n.trees=400,shrinkage=0.01,interaction.depth = 2 ,distribution = "bernoulli")
+
+
+boostpred = ifelse(predict(boost,test, n.trees = 400, "response") > 0.5, "1", "0")
+
+confboost<-table(predicted = boostpred, actual = test$HeartDisease)
+confboost
+error<-(confboost[1,1]+confboost[2,2])/sum(confboost)
+overall_boost <- error
+paste("accuraccy:",overall_boost)
+```
+Fitting the model with the tuning parameters previously discussed, we get a much better accuracy when compared to the other methods but at the cost of having lost the ability of doing inference in this data set. We can take a look at the importance graph below, in which we can see that ST_Slope, ChestPainType, and Cholesterol are the most important variables, which is somewhat consistent with most of the models used so far. Also Consistent with the other models, we can see that RestingECG and RestingBP are the least important variables for boosting.
+
+
+```{r,include=FALSE}
+summa<-summary(boost)
 ```
 
-This will be the section on Boosting. Include discussion on how & why you chose to do it the way you did it. 
+
+
+
+```{r,echo=FALSE}
+ggplot(summa)+geom_col(aes(x=var,y=rel.inf,fill=var))+coord_flip()+labs(y="Relative Influence", x= " Variable")+guides(fill="none")
+```
 
 ## Random Forest
 
