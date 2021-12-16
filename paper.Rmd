@@ -122,7 +122,7 @@ overall_logit <- (confm2[1,1]+confm2[2,2])/sum(confm2)
 
 Our next method for our binary classification problem was Linear Discriminate Analysis (LDA). LDA is used to find a linear combination of factors to sperate 2 or more classes. Typically, LDA uses only numeric predictors but through dummy variables, LDA can use categorical variables. This allows for limited inferences to be made from LDA.
 
-```{r LDA}
+```{r LDA,echo=FALSE}
 LDA_model = lda(HeartDisease~., data=train)
 LDA_model
 
@@ -163,7 +163,7 @@ mean(knn_pred_1 !=test$HeartDisease)
 
 After KNN, we used  the least absolute shrinkage and selection operator(LASSO). When using the LASSO method, it was important to select family = "binomial" for the classification problem. The tuning lambda value was selected through cross validation. LASSO performed relatively well with an accuracy of 0.85.
 
-```{r message=FALSE, warning=FALSE}
+```{r message=FALSE, warning=FALSE,echo=FALSE}
 train_matrix <- model.matrix(HeartDisease ~ ., data = train)
 test_matrix <- model.matrix(HeartDisease ~ ., data = test)
 grid <- 10^seq(10, -2, length=100)
@@ -369,7 +369,7 @@ While working on the random forests, I began to  search for a way to visualize a
 
 
 In the paper Banerjee, et al. discuss how to choose the most representative tree in an ensemble, which is done by finding the average distance between one tree and all other trees in the ensemble. Banerjee, et al. discusses several types of distance in this paper only one of them was used, as it was already implemented in a R package. This measure captures the similarities between the predictions, in that 2 trees are similar if they have the same predictions for all subjects, this is defined by Banerjee, et al as :
-$d_2(T_1,T_2)=\frac{1}{n}\sum_{i=1}^n(\hat{y}_{1i}-\hat{y}_{2i})^2$, if the trees perfectly similar, the distance $d_2(T_1,T_2)$ is equal 0. For for finding the representative tree we used the package "reptree", and using it on this random forests we got the following tree:
+$d_2(T_1,T_2)=\frac{1}{n}\sum_{i=1}^n(\hat{y}_{1i}-\hat{y}_{2i})^2$, if the trees perfectly similar, the distance $d_2(T_1,T_2)$ is equal 0. Finding the representative tree was done by using the package "reptree", and using it on this random forests we got the following tree:
 
 
 ```{r fig.height=7, fig.width=15, message=FALSE, warning=FALSE,echo=FALSE}
@@ -396,14 +396,14 @@ In the tree we can see ST_Slope is the root node, which was expected since most 
 
 The last model we used was SVM. We wanted to using the tuning method to best optimize our SVM. We tested three kernals for our SVM: linear, polynomial, and radial. We tuned the cost parameter for each, the degree parameter for the polynomial kernal, and the gamma parameter for the radial kernal.
 
-```{r SVM_linear}
+```{r SVM_linear,echo=FALSE}
 svm_linear_cv = tune(svm, HeartDisease~., scale=TRUE, kernel="linear", data=train,
                       ranges = list(cost = seq(0.1, 5, by = 0.1)))
 
 ggplot(data=svm_linear_cv$performances) + geom_point(aes(x=cost, y=error))
 ```
 
-```{r SVM_poly}
+```{r SVM_poly,echo=FALSE}
 svm_poly_cv = tune(svm, HeartDisease~., scale=TRUE, kernel="polynomial", data=train,
                       ranges = list(cost = seq(0.1, 5, by = 0.1),
                                     degree = c(2,3,4, 5)))
@@ -412,7 +412,7 @@ ggplot(data=svm_poly_cv$performances) + geom_point(aes(x=cost, y=error)) +
   facet_grid(~degree) + labs(title="Error of Polynomial Kernal by Degree")
 ```
 
-```{r SVM_radial}
+```{r SVM_radial,echo=FALSE}
 train <- read.csv("train.csv")
 test <- read.csv("test.csv")
 train$ChestPainType <- as.factor(train$ChestPainType)
@@ -444,7 +444,7 @@ We found that the radial kernel with cost of 0.4 and gamma parameter of 0.25 gav
 
 # Conclusion
 
-```{r}
+```{r,echo=FALSE}
 library(knitr)
 df1 = data.frame(Method = c("Logistic Regression","LDA","KNN","LASSO","Bagging","Random Forest","Boosting","SVM"),  Accuracy= c(overall_logit,overall_LDA,overall_knn_1,overall_lasso,overall_bag,overall_RF,overall_boost,overall_SVM))
 
@@ -452,7 +452,7 @@ kable(df1)
 
 ```
 
-We found that all of our models, except KNN, had an accuracy within a few points. It was interesting to note from LDA that our prior probabilities of our two classes closely follow the CDCs probability of getting heart disease. ST-Slope was shown to be the most important predictor in most of our models and we estimate this is the reason for the similar accuracy between models. So choosing the best model depends a lot on whether or not we value more inference or prediction, if we only care about inference, boosting is probably the best method otherwise, something like the logistic regression might be more useful for inference, however, if both are really important a using a random forest with a representative tree might be the best way.
+We found that all of our models, except KNN, had an accuracy within a few points as we can see from the table above. It was interesting to note from LDA that our prior probabilities of our two classes closely follow the CDCs probability of getting heart disease. ST-Slope was shown to be the most important predictor in most of our models and we estimate this is the reason for the similar accuracy between models. So choosing the best model depends a lot on whether or not we value more inference or prediction, if we only care about inference, boosting is probably the best method otherwise, something like the logistic regression might be more useful for inference. However, if both are really important a using a random forest with a representative tree might be the best way, it allows us to lose some predictive performance from boosting in order to gain the ability to do some interpretation.
 
 ## Future Proposal
 
