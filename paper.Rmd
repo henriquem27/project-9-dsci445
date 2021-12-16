@@ -197,7 +197,7 @@ ggplot(summa)+geom_col(aes(x=var,y=rel.inf,fill=var))+coord_flip()+labs(y="Relat
 ## Random Forest
 
 ```{r}
-rf_fit <- randomForest(as.factor(HeartDisease) ~ ., data = train, mtry = sqrt(ncol(train)-1), importance = TRUE, type= "classification", ntrees=1000)
+rf_fit <- randomForest(as.factor(HeartDisease) ~ ., data = train, mtry = sqrt(ncol(train)), importance = TRUE, type= "classification", ntrees=1000)
 
 true <- test$HeartDisease
 rf <- predict(rf_fit,test,type="class")
@@ -222,14 +222,18 @@ rownames(imp) <- 1:nrow(imp)
 imp <- imp[order(imp$MeanDecreaseAccuracy),]
 ```
 
+Next, we fitted a Random Forest, in this case I chose the number of predictors randomly sampled at each iteration to be $m=\sqrt{p}$, as this was what was recommended by the class book. For random forests, the test accuracy relatively good at 0.8664 which is good, but not better than some of te other methods. Looking at the variable importance, we have some similar results to the other tree based methods, as ST_Slope, ChestPainType, and Cholesterol seem to be the most important variables. However, in random forests we got a negative value for the RestingBP, which is somewhat consistent with the other methos as RestingBP also did not seem to be a important variable in dertermining heart disease, however, in this case it means that for random forests is seems that including RestingBP decreases the accuracy of the method. 
 
 
+```{r}
+ggplot(imp)+geom_col(aes(x=variables,y=MeanDecreaseAccuracy,fill=variables))+coord_flip()+labs(title="Variable Importance",y=" Mean decrease in Accuracy", x= " Variable")+scale_y_continuous(labels = scales::percent_format())+guides(fill="none")
+```
 
 
 
 ## Representative Tree
 
-This will be the section on Representative Tree. Include discussion on how & why you chose to do it the way you did it. 
+
 
 ## SVM
 
