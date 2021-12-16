@@ -61,7 +61,13 @@ test$HeartDisease <- as.factor(test$HeartDisease)
 
 In 2019 659,041 Americans died of heart disease. Four out of five heart disease deaths are due to heart attacks and strokes, and one-third of these deaths occur prematurely in people under 70 years of age. Heart failure is a common event caused by heart disease and this dataset we used contains 11 variables that can be used to predict a possible heart disease.
 
+## Motivation
+
 People with cardiovascular disease or who are at high cardiovascular risk (due to the presence of one or more risk factors) need early detection and management so machine learning techniques are of great clinical interest for early detection. 
+
+For this project, we proposed to use the various machine learning methods learned this semester in CSU's DSCI 445 Machine Learning class that can be applied to a classification problem.
+
+
 
 # Methods
 
@@ -99,15 +105,107 @@ This will be the section on LDA. Include discussion on how & why you chose to do
 ## KNN
 
 
-K-nearest Neighbors is useful for both regression and classification. An object will be classified by a vote of the nearest k neighbors. The object is assigned to the class most common to those k neighbors. For this project, k was selected by cross validation.  The best accuracy comes from a k of 23 with and accuracy of 0.6878024. Technically both k=1 and k=4 have higher accuracy, but we are avoiding k=1 using as any outlines would create a skew and in certain types of classification problems, our research shower it was better to avoid using an odd number as this can tie votes. With an prediction rate of only 0.6757493 had the lowest overall correct prediction rate. 
+The next method we used was K-Nearest Neighbors. K-nearest Neighbors is useful for both regression and classification. An object will be classified by a vote of the nearest k neighbors. The object is assigned to the class most common to those k neighbors. For this project, k was selected by cross validation.  The best accuracy comes from a k of 23 with and accuracy of 0.6878024. Technically both k=1 and k=4 have higher accuracy, but we are avoiding k=1 using as any outlines would create a skew and in certain types of classification problems, our research shower it was better to avoid using an odd number as this can tie votes. With an accuracy rate of only 0.6757493 had the lowest overall accuracy rate. 
+
+```{r message=FALSE, warning=FALSE,echo=FALSE}
+temp_train <- dummy_cols(train, select_columns = c("Sex", "ChestPainType", "RestingECG", "ST_Slope", "ExerciseAngina") )
+temp_test <- dummy_cols(test, select_columns = c("Sex", "ChestPainType", "RestingECG", "ST_Slope", "ExerciseAngina"))
+drops <- c("Sex", "ChestPainType", "RestingECG", "ST_Slope", "ExerciseAngina")
+temp_train <- temp_train[, !(names(temp_train) %in% drops)]
+temp_test <-temp_test[, !(names(temp_test) %in% drops)]
+#trainknn <- temp_train[-temp_train$HeartDisease]
+#testknn <- test[-test$HeartDisease]
+num_k <- seq(1:100)
+my_cv <- knn.cv(temp_train, temp_train$HeartDisease, k=num_k)
+knn_pred_1 <- knn(temp_train, temp_test, temp_train$HeartDisease, k=11)
+confm_knn_1<-table(knn_pred_1,test$HeartDisease)
+overall_knn_1 <- (confm_knn_1[1,1]+confm_knn_1[2,2])/sum(confm_knn_1)
+overall_knn_1
+ #confusion matrix
+kable(confm_knn_1)
+mean(knn_pred_1 !=test$HeartDisease)
+     
+```
 
 ## LASSO
 
-When using the LASSO method, it was important to select family = "binomial" for the classification problem. The tuning lambda value was selected through cross validation. 
+After KNN, we used  the least absolute shrinkage and selection operator(LASSO). When using the LASSO method, it was important to select family = "binomial" for the classification problem. The tuning lambda value was selected through cross validation. LASSO performed relatively well with an accuracy of 0.85.
+
+```{r message=FALSE, warning=FALSE}
+train_matrix <- model.matrix(HeartDisease ~ ., data = train)
+test_matrix <- model.matrix(HeartDisease ~ ., data = test)
+grid <- 10^seq(10, -2, length=100)
+lasso <- glmnet(train_matrix, train$HeartDisease, alpha = 1, lambda = grid, thresh = 1e-12, family = "binomial")
+#plot(lasso)
+cv_lasso  <- cv.glmnet(train_matrix, train[, "HeartDisease"], alpha=1,family = "binomial")
+#plot(cv_lasso)
+best_lambda_lasso <- cv_lasso$lambda.min
+lasso_prediction <- predict(lasso, newx = test_matrix, s = best_lambda_lasso)
+lasso_MSE <- mean((lasso_prediction - test[, "HeartDisease"])^2)
+num_zeros <-cv_lasso$nzero[which.min(cv_lasso$cvm)]
+# MSE values to use:
+paste("Tuning Lambda",best_lambda_lasso)
+#lasso_MSE
+#paste("Number of zeros",num_zeros)
+#Confusion Matrix
+predicted_lasso <- predict(lasso, newx= test_matrix, s=best_lambda_lasso)
+predicted_lasso <- ifelse(predicted_lasso>0.5,1,0)
+confm_lasso<-table(predicted=predicted_lasso,True=test$HeartDisease)
+confm_lasso
+#Over all correct:
+overall_lasso <- (confm_lasso[1,1]+confm_lasso[2,2])/sum(confm_lasso)
+kable(confm_lasso) #confusion matrix
+overall_lasso #over all correct
+```
+
+
 
 ## Bagging
 
-This will be the section on Bagging. Include discussion on how & why you chose to do it the way you did it. 
+The bagging model was preformed with 500 trees and identified the most important variable as being ST_Slope followed by Chest Pain Type. Interestingly, resting ECG and Resting BP both had negative importance. This means if we remove those two features, we would improve model performance. As other methods found resting ECG and Resting BP to be among the least important variable, it would be worth taking the time to remove them and see if it improves the accuracy rates for our data. Bagging performed rather disappointingly with an accuracy of 0.84, the lowest of all methods except KNN.
+
+```{r,echo=FALSE,warning=FALSE,fig.width=6,fig.height=3}
+train <- read.csv("train.csv")
+test <- read.csv("test.csv")
+train$ChestPainType <- as.factor(train$ChestPainType)
+train$Sex <- as.factor(train$Sex)
+train$FastingBS <- as.factor(train$FastingBS)
+train$RestingECG <- as.factor(train$RestingECG)
+train$ExerciseAngina <- as.factor(train$ExerciseAngina)
+train$ST_Slope <- as.factor(train$ST_Slope)
+test$ChestPainType <- as.factor(test$ChestPainType)
+test$Sex <- as.factor(test$Sex)
+test$FastingBS <- as.factor(test$FastingBS)
+test$RestingECG <- as.factor(test$RestingECG)
+test$ExerciseAngina <- as.factor(test$ExerciseAngina)
+test$ST_Slope <- as.factor(test$ST_Slope)
+bagging <- randomForest(HeartDisease ~ .,data = train, mtry = 19, ntree = 500, type = "class", 
+                        importance = TRUE,
+                        proximity = TRUE) 
+#Confusion Matrix
+predict_bag <- predict(bagging, newdata = test)
+predicted_bag <- ifelse(predict_bag>0.5,1,0)
+confm_bag<-table(predicted_bag,test$HeartDisease)
+#MSE
+bagging_mse <- mean((predict_bag - test$HeartDisease)^2) 
+#Over all correct:
+overall_bag <- (confm_bag[1,1]+confm_bag[2,2])/sum(confm_bag)
+kable(confm_bag) #confusion matrix
+overall_bag #over all correct
+#Visulizaton of bagging
+VI <- data.frame(var=names(test[,-12]), imp=varImp(bagging))
+#sort variable importance descending
+#VI_plot <- VI[order(VI$imp.0, decreasing=TRUE),]
+#visualize variable importance with horizontal bar plot
+#barplot(VI_plot$imp.0,
+   #     names.arg=rownames(VI_plot),
+    #    horiz=TRUE,
+     #   col='steelblue',
+      #  xlab='Variable Importance')
+ggplot(VI)+geom_col(aes(x=var,y=Overall,fill=var))+coord_flip()+guides(fill="none")+
+  labs(x="Variable Name",y="Importance")
+```
+
 
 ## Bosting
 
