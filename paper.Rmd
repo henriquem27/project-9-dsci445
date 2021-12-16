@@ -100,7 +100,19 @@ overall_logit <- (confm2[1,1]+confm2[2,2])/sum(confm2)
 
 ## LDA
 
-This will be the section on LDA. Include discussion on how & why you chose to do it the way you did it. 
+Our next method for our binary classification problem was Linear Discriminate Analysis (LDA). LDA is used to find a linear combination of factors to sperate 2 or more classes. Typically, LDA uses only numeric predictors but through dummy variables, LDA can use categorical variables. This allows for limited inferences to be made from LDA.
+
+```{r LDA}
+LDA_model = lda(HeartDisease~., data=train)
+LDA_model
+
+preds = predict(LDA_model, test)
+overall_LDA = sum(ifelse(preds$class == test$HeartDisease, 1, 0))/nrow(test)
+
+table(preds$class, "True"=heart_test$HeartDisease)
+```
+
+The LDA model achived a test accuracy of `r round(overall_LDA, 3)`. Even though we can't make strong infrences from our LDA, we can look at the means of each factor of each class. We see that the Resting BP factor has little class mean difference. 
 
 ## KNN
 
@@ -352,7 +364,36 @@ $d_2(T_1,T_2)=\frac{1}{n}\sum_{i=1}^n(\hat{y}_{1i}-\hat{y}_{2i})^2$, if the tree
 
 ## SVM
 
-This will be the section on SVM. Include discussion on how & why you chose to do it the way you did it. 
+The last model we used was SVM. We wanted to using the tuning method to best optimize our SVM. We tested three kernals for our SVM: linear, polynomial, and radial. We tuned the cost parameter for each, the degree parameter for the polynomial kernal, and the gamma parameter for the radial kernal.
+
+```{r SVM_linear}
+svm_linear_cv = tune(svm, HeartDisease~., scale=TRUE, kernel="linear", data=train,
+                      ranges = list(cost = seq(0.1, 5, by = 0.1)))
+
+ggplot(data=svm_linear_cv$performances) + geom_point(aes(x=cost, y=error))
+```
+
+```{r SVM_poly}
+svm_poly_cv = tune(svm, HeartDisease~., scale=TRUE, kernel="polynomial", data=train,
+                      ranges = list(cost = seq(0.1, 5, by = 0.1),
+                                    degree = c(2,3,4, 5)))
+
+ggplot(data=svm_poly_cv$performances) + geom_point(aes(x=cost, y=error)) + 
+  facet_grid(~degree) + labs(title="Error of Polynomial Kernal by Degree")
+```
+
+```{r SVM_radial}
+SVM_radial = svm(HeartDisease~., data=train, kernel="radial", gamma=0.25, cost=0.4)
+
+preds = predict(SVM_radial, test, type="class")
+acc = sum(ifelse(preds == test$HeartDisease, 1, 0))/nrow(test)
+
+table(preds,test$HeartDisease)
+
+overall_SVM <- acc
+```
+
+We found that the radial kernal with cost of 0.4 and gamma parameter of 0.25 gave us the best training accuracy. Our testing accuracy for our SVM model was `r round(acc, 3)`.
 
 # Methods That Didn't Work
 
@@ -360,7 +401,9 @@ This will be the section on methods we considered but did work. Include discussi
 
 # Conclusion
 
+We found that all of our models, except KNN, had an accuracy within a few points. It was interesting to note from LDA that our prioir probabilities of our two classes closely follow the CDCs probability of getting heart disease. ST-Slope was shown to be the most important predictor in most of our models and we estimate this is the reason for the similar accuracies between models.
+
 ## Future Proposal
 
-It would be interesting to re-try this project, removing the ST-Slope value. As we learned from industry professionals, the ST Slope is nearly always associated with some type of heart rhythm anomaly, and thus is frequently present in cases of heart disease. Many of our models indicated the ST Slope as the number one predictor for heart disease due to this strong association. 
+It would be interesting to re-try this project, removing the ST-Slope value. As we learned from industry professionals, the ST Slope is nearly always associated with some type of heart rhythm anomaly, and thus is frequently present in cases of heart disease. Many of our models indicated the ST Slope as the number one predictor for heart disease due to this strong association. We also would've liked to be able to make more infrences from our models. A model like LDA may have one of the highest accuracies, but we could make very little infrences about our data from this model.
 
