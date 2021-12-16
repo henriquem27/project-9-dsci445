@@ -109,7 +109,7 @@ LDA_model
 preds = predict(LDA_model, test)
 overall_LDA = sum(ifelse(preds$class == test$HeartDisease, 1, 0))/nrow(test)
 
-table(preds$class, "True"=heart_test$HeartDisease)
+table(preds$class, "True"=test$HeartDisease)
 ```
 
 The LDA model achived a test accuracy of `r round(overall_LDA, 3)`. Even though we can't make strong infrences from our LDA, we can look at the means of each factor of each class. We see that the Resting BP factor has little class mean difference. 
@@ -352,12 +352,14 @@ In the paper Banerjee, et al. discuss how to choose the most representative tree
 $d_2(T_1,T_2)=\frac{1}{n}\sum_{i=1}^n(\hat{y}_{1i}-\hat{y}_{2i})^2$, if the trees perfectly similar, the distance $d_2(T_1,T_2)$ is equal 0. For for finding the representative tree we used the package "reptree", and using it on this random forests we got the following tree:
 
 
-{r fig.height=7, fig.width=15, message=FALSE, warning=FALSE,echo=FALSE}
+```{r fig.height=7, fig.width=15, message=FALSE, warning=FALSE,echo=FALSE}
 set.seed(445)
 
 reptree <- ReprTree(rf_fit, train, metric='d2')
 
 plot(reptree, index=1)
+
+```
 
 
 
@@ -396,22 +398,31 @@ SVM_radial = svm(HeartDisease~., data=train, kernel="radial", gamma=0.25, cost=0
 preds = predict(SVM_radial, test, type="class")
 acc = sum(ifelse(preds == test$HeartDisease, 1, 0))/nrow(test)
 
-table(preds,test$HeartDisease)
+#table(preds,test$HeartDisease)
 
 overall_SVM <- acc
 ```
 
-We found that the radial kernal with cost of 0.4 and gamma parameter of 0.25 gave us the best training accuracy. Our testing accuracy for our SVM model was `r round(acc, 3)`.
+We found that the radial kernel with cost of 0.4 and gamma parameter of 0.25 gave us the best training accuracy. Our testing accuracy for our SVM model was `r round(acc, 3)`.
 
-# Methods That Didn't Work
 
-This will be the section on methods we considered but did work. Include discussion on how & why you didn't chose to do it. 
 
 # Conclusion
 
-We found that all of our models, except KNN, had an accuracy within a few points. It was interesting to note from LDA that our prioir probabilities of our two classes closely follow the CDCs probability of getting heart disease. ST-Slope was shown to be the most important predictor in most of our models and we estimate this is the reason for the similar accuracies between models.
+```{r}
+library(knitr)
+df1 = data.frame(Method = c("Logistic Regression","LDA","KNN","LASSO","Bagging","Random Forest","Boosting","SVM"),  Accuracy= c(overall_logit,overall_LDA,overall_knn_1,overall_lasso,overall_bag,overall_RF,overall_boost,overall_SVM))
+
+kable(df1)
+
+```
+
+We found that all of our models, except KNN, had an accuracy within a few points. It was interesting to note from LDA that our prior probabilities of our two classes closely follow the CDCs probability of getting heart disease. ST-Slope was shown to be the most important predictor in most of our models and we estimate this is the reason for the similar accuracy between models. So choosing the best model depends a lot on whether or not we value more inference or prediction, if we only care about inference, boosting is probably the best method otherwise, something like the logistic regression might be more useful for inference, however, if both are really important a using a random forest with a representative tree might be the best way.
 
 ## Future Proposal
 
-It would be interesting to re-try this project, removing the ST-Slope value. As we learned from industry professionals, the ST Slope is nearly always associated with some type of heart rhythm anomaly, and thus is frequently present in cases of heart disease. Many of our models indicated the ST Slope as the number one predictor for heart disease due to this strong association. We also would've liked to be able to make more infrences from our models. A model like LDA may have one of the highest accuracies, but we could make very little infrences about our data from this model.
+It would be interesting to re-try this project, removing the ST-Slope value. As we learned from industry professionals, the ST Slope is nearly always associated with some type of heart rhythm anomaly, and thus is frequently present in cases of heart disease. Many of our models indicated the ST Slope as the number one predictor for heart disease due to this strong association. We also would've liked to be able to make more inference from our models. A model like LDA may have one of the highest accuracy, but we could make very little inference about our data from this model.
+
+
+
 
