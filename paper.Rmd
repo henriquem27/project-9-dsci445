@@ -334,7 +334,17 @@ ggplot(imp)+geom_col(aes(x=variables,y=MeanDecreaseAccuracy,fill=variables))+coo
 While working on the random forests, I began to  search for a way to visualize at least one of the trees in the ensemble, in order to more visualization and perhaps get a deeper insight into the method. While I found a way to do it in stack overflow, I also found a recommendation of a paper by Banerjee, et al. called "Identifying representative trees from ensembles" (2012), which was published in the journal of statistical medicine. What we found really interesting is that the example application which was very similar to our application as it was classification problem using kidney cancer data, and there they discuss the importance of not losing the ability to do inference while still having high accuracy.
 
 
-In the paper Banerjee, et al. discuss how to choose the most representative tree in an ensemble, which is done by finding the average distance between one tree and all other trees in the ensemble. Banerjee, et al. discusses several types of distance in this paper only one of them was used, as it was already implemented in R package. This measure captures the similarities between the predictions, in that 2 trees are similar if they have the same predictions outcomes.
+In the paper Banerjee, et al. discuss how to choose the most representative tree in an ensemble, which is done by finding the average distance between one tree and all other trees in the ensemble. Banerjee, et al. discusses several types of distance in this paper only one of them was used, as it was already implemented in a R package. This measure captures the similarities between the predictions, in that 2 trees are similar if they have the same predictions for all subjects, this is defined by Banerjee, et al as :
+$d_2(T_1,T_2)=\frac{1}{n}\sum_{i=1}^n(\hat{y}_{1i}-\hat{y}_{2i})^2$, if the trees perfectly similar, the distance $d_2(T_1,T_2)$ is equal 0. For for finding the representative tree we used the package "reptree", and using it on this random forests we got the following tree:
+
+
+
+
+
+
+
+
+
 
 
 
