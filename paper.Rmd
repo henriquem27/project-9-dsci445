@@ -196,7 +196,7 @@ ggplot(summa)+geom_col(aes(x=var,y=rel.inf,fill=var))+coord_flip()+labs(y="Relat
 
 ## Random Forest
 
-```{r}
+```{r,echo=FALSE}
 rf_fit <- randomForest(as.factor(HeartDisease) ~ ., data = train, mtry = sqrt(ncol(train)), importance = TRUE, type= "classification", ntrees=1000)
 
 true <- test$HeartDisease
@@ -225,13 +225,20 @@ imp <- imp[order(imp$MeanDecreaseAccuracy),]
 Next, we fitted a Random Forest, in this case I chose the number of predictors randomly sampled at each iteration to be $m=\sqrt{p}$, as this was what was recommended by the class book. For random forests, the test accuracy relatively good at 0.8664 which is good, but not better than some of te other methods. Looking at the variable importance, we have some similar results to the other tree based methods, as ST_Slope, ChestPainType, and Cholesterol seem to be the most important variables. However, in random forests we got a negative value for the RestingBP, which is somewhat consistent with the other methos as RestingBP also did not seem to be a important variable in dertermining heart disease, however, in this case it means that for random forests is seems that including RestingBP decreases the accuracy of the method. 
 
 
-```{r}
+```{r,echo=FALSE}
 ggplot(imp)+geom_col(aes(x=variables,y=MeanDecreaseAccuracy,fill=variables))+coord_flip()+labs(title="Variable Importance",y=" Mean decrease in Accuracy", x= " Variable")+scale_y_continuous(labels = scales::percent_format())+guides(fill="none")
 ```
 
 
 
 ## Representative Tree
+
+While working on the random forests, I began to  search for a way to visualize at least one of the trees in the ensemble, in order to more visualization and perhaps get a deeper insight into the method. While I found a way to do it in stack overflow, I also found a recommendation of a paper by Banerjee, et al. called "Identifying representative trees from ensembles" (2012), which was published in the journal of statistical medicine. What we found really interesting is that the example application which was very similar to our application as it was classification problem using kidney cancer data, and there they discuss the importance of not losing the ability to do inference while still having high accuracy.
+
+
+In the paper Banerjee, et al. discuss how to choose the most representative tree in a n esemble.
+
+
 
 
 
