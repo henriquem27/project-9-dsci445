@@ -196,7 +196,36 @@ ggplot(summa)+geom_col(aes(x=var,y=rel.inf,fill=var))+coord_flip()+labs(y="Relat
 
 ## Random Forest
 
-This will be the section on Random Forest. Include discussion on how & why you chose to do it the way you did it. 
+```{r}
+rf_fit <- randomForest(as.factor(HeartDisease) ~ ., data = train, mtry = sqrt(ncol(train)-1), importance = TRUE, type= "classification", ntrees=1000)
+
+true <- test$HeartDisease
+rf <- predict(rf_fit,test,type="class")
+
+
+
+confm2<-table(predicted=rf,True=true)
+confm2
+
+
+paste(" Test Accuracy :",(confm2[1,1]+confm2[2,2])/sum(confm2))
+
+
+overall_RF <- (confm2[1,1]+confm2[2,2])/sum(confm2)
+rf_fit
+
+imp<-data.frame(rf_fit$importance)
+
+imp$variables <- rownames(imp)
+rownames(imp) <- 1:nrow(imp)
+
+imp <- imp[order(imp$MeanDecreaseAccuracy),]
+```
+
+
+
+
+
 
 ## Representative Tree
 
