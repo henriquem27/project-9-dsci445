@@ -5,6 +5,26 @@ date: "12/11/2021"
 output: pdf_document
 ---
 
+
+```{r , include=FALSE}
+
+#installation for the reprtree package.
+options(repos='http://cran.rstudio.org')
+have.packages <- installed.packages()
+cran.packages <- c('devtools','plotrix','randomForest','tree')
+to.install <- setdiff(cran.packages, have.packages[,1])
+if(length(to.install)>0) install.packages(to.install)
+
+library(devtools)
+if(!('reprtree' %in% installed.packages())){
+  install_github('araastat/reprtree')
+}
+for(p in c(cran.packages, 'reprtree')) eval(substitute(library(pkg), list(pkg=p)))
+
+
+
+```
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
@@ -393,12 +413,27 @@ ggplot(data=svm_poly_cv$performances) + geom_point(aes(x=cost, y=error)) +
 ```
 
 ```{r SVM_radial}
-SVM_radial = svm(HeartDisease~., data=train, kernel="radial", gamma=0.25, cost=0.4)
+train <- read.csv("train.csv")
+test <- read.csv("test.csv")
+train$ChestPainType <- as.factor(train$ChestPainType)
+train$Sex <- as.factor(train$Sex)
+train$FastingBS <- as.factor(train$FastingBS)
+train$RestingECG <- as.factor(train$RestingECG)
+train$ExerciseAngina <- as.factor(train$ExerciseAngina)
+train$ST_Slope <- as.factor(train$ST_Slope)
+test$ChestPainType <- as.factor(test$ChestPainType)
+test$Sex <- as.factor(test$Sex)
+test$FastingBS <- as.factor(test$FastingBS)
+test$RestingECG <- as.factor(test$RestingECG)
+test$ExerciseAngina <- as.factor(test$ExerciseAngina)
+test$ST_Slope <- as.factor(test$ST_Slope)
+
+SVM_radial = svm(HeartDisease~., data=train, kernel="radial", gamma=0.25, cost=0.4,type="C")
 
 preds = predict(SVM_radial, test, type="class")
 acc = sum(ifelse(preds == test$HeartDisease, 1, 0))/nrow(test)
 
-#table(preds,test$HeartDisease)
+table(preds,test$HeartDisease)
 
 overall_SVM <- acc
 ```
@@ -424,5 +459,8 @@ We found that all of our models, except KNN, had an accuracy within a few points
 It would be interesting to re-try this project, removing the ST-Slope value. As we learned from industry professionals, the ST Slope is nearly always associated with some type of heart rhythm anomaly, and thus is frequently present in cases of heart disease. Many of our models indicated the ST Slope as the number one predictor for heart disease due to this strong association. We also would've liked to be able to make more inference from our models. A model like LDA may have one of the highest accuracy, but we could make very little inference about our data from this model.
 
 
+## References
 
+
+Banerjee M, Ding Y, Noone AM. Identifying representative trees from ensembles. Stat Med. 2012 Jul 10;31(15):1601-16. doi: 10.1002/sim.4492. Epub 2012 Feb 3. PMID: 22302520.
 
